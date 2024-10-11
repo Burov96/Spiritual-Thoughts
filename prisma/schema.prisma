@@ -1,0 +1,76 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int           @id @default(autoincrement())
+  name      String
+  email     String        @unique
+  profilePicture String? @db.VarChar(255)
+  password  String
+  avatar    String?
+  interests UserInterest[]
+  posts     Post[]
+  likes     Like[]
+  prayers   Prayer[]
+  influences Influence[]
+}
+
+model Post {
+    id         Int         @id @default(autoincrement())
+  content    String
+  author     User        @relation(fields: [authorId], references: [id])
+  authorId   Int
+  influences Influence[] 
+  likes      Like[]
+  prayers    Prayer[]
+  createdAt  DateTime    @default(now())
+}
+
+model Influence {
+  id     Int    @id @default(autoincrement())
+  type   String
+  postId Int
+  userId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id])
+  }
+
+model Interest {
+  id    Int             @id @default(autoincrement())
+  name  String          @unique
+  users UserInterest[]
+}
+
+model Like {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+}
+
+model Prayer {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+}
+
+
+
+model UserInterest {
+  userId     Int
+  interestId Int
+  user       User      @relation(fields: [userId], references: [id])
+  interest   Interest  @relation(fields: [interestId], references: [id])
+
+  @@id([userId, interestId])
+}
+

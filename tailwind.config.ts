@@ -11,6 +11,8 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        zeleno:"#00ddb3",
+        sinio:"#008cff"
       },
     },
   },
