@@ -6,11 +6,11 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import Post from "@/app/components/Post";
-import PostForm from "@/app/components/PostForm";
-import { useNotification } from "@/app/NotificationProvider"; // Correct import
+import { Post } from "../components/Post";
+import { PostForm } from "../components/PostForm";
+import { useNotification } from "../NotificationProvider"; // Correct import
 import { useRouter } from "next/navigation";
-import Loading from "@/app/components/Loading";
+import { Loading } from "../components/Loading";
 
 export default function Feed() {
   const { showNotification } = useNotification(); // Use the hook directly
@@ -67,10 +67,7 @@ const fetchPosts = async (setPosts, showNotification) => {
 
 ## File: app/context/NotificationContext.tsx
 ```tsx
-// app/context/NotificationContext.tsx
-
 "use client";
-
 import React, {
   createContext,
   ReactNode,
@@ -101,7 +98,6 @@ const notificationReducer = (state: State, action: Action): State => {
     case "ADD_NOTIFICATION": {
       const { message, type, persistent = false } = action.payload;
 
-      // Determine the smallest missing ID
       const sortedIds = [...state.notifications.map((n) => n.id)].sort(
         (a, b) => a - b
       );
@@ -116,13 +112,11 @@ const notificationReducer = (state: State, action: Action): State => {
       const id =
         smallestMissingId <= state.nextId ? smallestMissingId : state.nextId;
 
-      // Add the new notification
       const newNotifications: NotificationItem[] = [
         ...state.notifications,
         { id, message, type, persistent },
       ];
 
-      // Update available IDs and nextId
       const newAvailableIds = state.availableIds.filter(
         (existingId) => existingId !== id
       );
@@ -185,7 +179,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
   const timers = useRef<Map<number, NodeJS.Timeout>>(new Map());
   const hoveredNotifications = useRef<Set<number>>(new Set());
 
-  // Function to show a new notification
   const showNotification = useCallback(
     (message: string, type: NotificationType, persistent: boolean = false) => {
       const id = findSmallestMissingId(state.notifications.map((n) => n.id));
@@ -196,7 +189,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
         payload: { message, type, persistent },
       });
 
-      // Set timer to remove the notification after 3 seconds if not persistent
       if (!persistent) {
         const timer = setTimeout(() => {
           if (!hoveredNotifications.current.has(finalId)) {
@@ -211,7 +203,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     [state.notifications, state.nextId]
   );
 
-  // Function to remove a notification manually
   const removeNotification = useCallback((id: number) => {
     dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
     const timer = timers.current.get(id);
@@ -222,29 +213,32 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     hoveredNotifications.current.delete(id);
   }, []);
 
-  // Function to handle hover events
-  const handleNotificationHover = useCallback((id: number, isHovered: boolean) => {
-    if (isHovered) {
-      hoveredNotifications.current.add(id);
-      const timer = timers.current.get(id);
-      if (timer) {
-        clearTimeout(timer);
-        timers.current.delete(id);
-      }
-    } else {
-      hoveredNotifications.current.delete(id);
-      const shouldPersist = state.notifications.find((n) => n.id === id)?.persistent;
-      if (!shouldPersist) {
-        const newTimer = setTimeout(() => {
-          dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
+  const handleNotificationHover = useCallback(
+    (id: number, isHovered: boolean) => {
+      if (isHovered) {
+        hoveredNotifications.current.add(id);
+        const timer = timers.current.get(id);
+        if (timer) {
+          clearTimeout(timer);
           timers.current.delete(id);
-        }, 3000);
-        timers.current.set(id, newTimer);
+        }
+      } else {
+        hoveredNotifications.current.delete(id);
+        const shouldPersist = state.notifications.find(
+          (n) => n.id === id
+        )?.persistent;
+        if (!shouldPersist) {
+          const newTimer = setTimeout(() => {
+            dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
+            timers.current.delete(id);
+          }, 3000);
+          timers.current.set(id, newTimer);
+        }
       }
-    }
-  }, [state.notifications]);
+    },
+    [state.notifications]
+  );
 
-  // Cleanup all timers on unmount
   useEffect(() => {
     return () => {
       timers.current.forEach((timer) => clearTimeout(timer));
@@ -253,7 +247,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, []);
 
-  // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
       showNotification,
@@ -277,6 +270,18 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     </NotificationContext.Provider>
   );
 };
+
+// Custom hook to use the Notification Context
+export const useNotification = (): NotificationContextProps => {
+  const context = useContext(NotificationContext);
+  if (context === undefined) {
+    throw new Error(
+      "useNotification must be used within a NotificationProvider"
+    );
+  }
+  return context;
+};
+
 ```
 
 ## File: app/_app.js
@@ -312,16 +317,23 @@ export const useNotification = () => {
 
 ## File: app/hooks/usePosts.ts
 ```ts
+// File: usePosts.ts
+
 "use client";
-import React from "react";
-import { useState, useTransition}  from 'react';
+
+import React, { useState, useTransition, useEffect } from 'react';
+
+interface Post {
+  id: number;
+  title: string;
+}
 
 export function usePosts() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const addPost = async (title:String) => {
+  const addPost = async (title: string) => {
     startTransition(async () => {
       try {
         const response = await fetch('/api/posts', {
@@ -334,15 +346,19 @@ export function usePosts() {
         if (!response.ok) {
           throw new Error('Failed to add post');
         }
-        const newPost = await response.json();
+        const newPost: Post = await response.json();
         setPosts((prevPosts) => [...prevPosts, newPost]);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     });
   };
 
-  const deletePost = async (id) => {
+  const deletePost = async (id: number) => {
     startTransition(async () => {
       try {
         const response = await fetch(`/api/posts/${id}`, {
@@ -353,23 +369,31 @@ export function usePosts() {
         }
         setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id));
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     });
   };
 
   // Fetch posts on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchPosts() {
       try {
         const response = await fetch('/api/posts');
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
         }
-        const data = await response.json();
+        const data: Post[] = await response.json();
         setPosts(data);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     }
     fetchPosts();
@@ -395,7 +419,7 @@ import Loading from "../components/Loading"
 import { useNotification } from "../NotificationProvider";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import {ProfileForm} from "@/app/components/ProfileForm"
+import {ProfileForm} from "../../app/components/ProfileForm"
 
 export default function Profile(){
   const {data:session, status} = useSession();
@@ -433,7 +457,7 @@ export default function Profile(){
 "use client"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import FollowButton from "@/app/components/FollowButton"
+import FollowButton from "../../components/FollowButton"
 
 export default function Profile() {
   const router = useRouter()
@@ -498,13 +522,13 @@ export default function ProtectedPage() {
 
 import React, { createContext, useReducer, useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { Notification } from "./components/Notification";
-import { NotificationProps, NotificationType, State, Action } from "./notificationTypes";
+import {  NotificationType, State, Action } from "./notificationTypes";
 
 // Create the Notification Context
 export const NotificationContext = createContext<{
   showNotification: (message: string, type: NotificationType, persistent?: boolean) => void;
   removeNotification: (id: number) => void;
-  notifications: NotificationProps[];
+  notifications: any[];
 } | undefined>(undefined);
 
 // Initial state for the reducer
@@ -644,60 +668,6 @@ export const useNotification = () => {
 
 ```
 
-## File: app/example/page.tsx
-```tsx
-'use client'
-import React, { useReducer } from 'react'
-
-interface Action{
-    type:"increment"|"decrement",
-}
-
-interface State{
-    count:number,
-    error:string|null|boolean
-}
-
-function page() {
-function reducer(state:State, action:Action){
-    const {type}=action;
-    console.log(type)
-    switch(type){
-        case "increment":{
-            const newCount = state.count + 1;
-            if(newCount>10){
-                return { ...state,error:"Count is too high!"}
-            }
-            return{ ...state,count:state.count+1, error:false}
-        }
-        case "decrement":{
-            const newCount = state.count - 1;
-            if(newCount<0){
-                return { ...state,error:"Count is too low!"}
-            }
-            return { ...state,count:state.count--, error:false}
-        }
-    }
-}
-
-const [state,dispatch]=useReducer(reducer, {
-    count:0,
-    error:Boolean(false)
-})
-
-  return (
-<div className={`flex flex-col align-middle items-center justify-center my-20 ${state.error ? " border-2 border-red-300" : ""}`}>
-    <div>Currently it's:{state.count}</div>
-    <button onClick={()=>dispatch({type:"increment"})} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded m-5'>Increment</button>
-    <button onClick={()=>dispatch({type:"decrement"})} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded m-5'>Decrement</button>
-    {state.error && <div className='text-red-500'>{state.error}</div>}
-</div>
-  )
-}
-
-export default page
-```
-
 ## File: app/layout.tsx
 ```tsx
 import type { Metadata } from "next";
@@ -746,7 +716,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```js
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma";
 
 export async function GET(request) {
   const session = await getServerSession(authOptions);
@@ -887,7 +857,7 @@ export default async function handler(req, res) {
 ```js
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -970,7 +940,7 @@ export async function PUT(request) {
 // app/api/upload-avatar/route.js
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma";
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);
@@ -995,8 +965,8 @@ export async function POST(request) {
 // app/api/posts/route.ts
 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import { authOptions } from "../../../app/api/auth/[...nextauth]/route";
+import prisma from "../../../lib/prisma";
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions as any);
@@ -1058,12 +1028,12 @@ export async function POST(request: Request) {
 ## File: app/api/posts/[id]/influence/route.ts
 ```ts
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import { authOptions } from "../../../../../app/api/auth/[...nextauth]/route";
+import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions as any);
   if (!session) {
     console.log("Unauthorized access to like route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -1204,8 +1174,8 @@ export default async function handler(req, res) {
 ## File: app/api/posts/[id]/delete/route.ts
 ```ts
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import { authOptions } from "../../../auth/[...nextauth]/route";
+import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
@@ -1314,7 +1284,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 import NextAuth from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
+import prisma from "../../../../lib/prisma";
 import { compare } from "bcryptjs";
 
 export const authOptions = {
@@ -1370,7 +1340,7 @@ export { handler as GET, handler as POST };
 // app/api/auth/register/route.js
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import prisma from '@/lib/prisma';
+import prisma from '../../../../lib/prisma';
 
 export async function POST(request) {
   const { name, email, password } = await request.json();
@@ -1748,8 +1718,8 @@ import { useSession } from "next-auth/react";
 import { useState, useContext } from "react";
 import Image from "next/image";
 import Like from "./Like";
-import { useNotification } from "@/app/hooks/useNotification";
 import { revalidatePath } from "next/cache";
+import { useNotification } from "../NotificationProvider";
 
 export interface User {
   id: number;
@@ -1810,7 +1780,7 @@ interface PostProps {
   };
 }
 
-export default function Post({ post }: PostProps) {
+export  function Post({ post }: PostProps) {
   const { data: session } = useSession();
   const [influenced, setInfluenced] = useState(post.influences.length || 0);
   const [userInfluenced, setUserInfluenced] = useState(
@@ -1907,11 +1877,11 @@ const isAuthor = session?.user?.email === post.author.email;
 
 import React, { useEffect, useState, useCallback } from "react";
 import { DotLottiePlayer } from "@dotlottie/react-player";
-import { NotificationProps } from "../notificationTypes";
+import { NotificationContextProps } from "../notificationTypes";
 import Thrash from "./Thrash";
 import styles from "./Notification.module.css";
 
-const Notification: React.FC<NotificationProps> = ({
+const Notification: React.FC<any> = ({
   message,
   type,
   id,
@@ -2217,115 +2187,6 @@ export default function Footer() {
     </footer>
   );
 }
-
-```
-
-## File: app/components/Notification old.tsx
-```tsx
-"use client";
-import { DotLottiePlayer } from "@dotlottie/react-player";
-import { useCallback, useEffect, useState } from "react";
-import { NotificationProps, NotificationType } from "../notificationTypes";
-
-const Notification:React.FC<NotificationProps> = ({ message, type, id}) => {
-  const [fade, setFade] = useState(Boolean);
-  const [opened, setOpened] = useState(Boolean);
-
-  const handleClose = useCallback(() => {
-    setFade(false);
-    setOpened(false);
-    setTimeout(() => {
-    }, 300);
-  }, []);
-
-  useEffect(() => {
-    const preTimeout = setTimeout(() => {
-      setFade(true);
-      setOpened(true);
-    }, 20);
-
-    const fadeTimeout = setTimeout(() => {
-      setFade(false);
-    }, 2700);
-
-    const closeTimeout = setTimeout(() => {
-      handleClose();
-    }, 3000);
-
-    console.log(id)
-    return () => {
-      clearTimeout(preTimeout);
-      clearTimeout(fadeTimeout);
-      clearTimeout(closeTimeout);
-    };
-  }, [id, handleClose]);
-
-
-  return (
-    message && (
-      <div
-        className={`z-[999] fixed top-10 md:top-32 right-1 w-60 md:w-80 h-16 md:h-24 bg-white p-4 rounded-lg shadow-md flex items-center justify-between hover:shadow-2xl transition-all duration-1000  opacity-0 md:scale-100 sm:scale-75`}
-        style={{
-          opacity: opened ? 1 : 0,
-          transform: `translateX(${fade ? -40 : opened ? -10 : 100}px)`,
-          top: `${10 + id*7}rem`,
-        }}
-      >
-        <div className="w-20 h-20 flex items-center justify-center rounded-full">
-            {type === "success" ? (
-              <DotLottiePlayer src={"/images/success.lottie"} autoplay={true} />
-            ) : type === "failure" ? (
-              <DotLottiePlayer src={"/images/failure.lottie"} autoplay={true} />
-            ) : type === "goodbye" ? (
-              <DotLottiePlayer src={"/images/goodbye.lottie"} autoplay={true} />
-            ) : type === "removed" ? (
-              <DotLottiePlayer
-                src={"/images/removed.lottie"}
-                autoplay={true}
-                direction={-1}
-              />
-            ) : type === "favourite" ? (
-              <DotLottiePlayer
-                src={"/images/favourite.lottie"}
-                autoplay={true}
-              />
-            ) : type === "delete" ? (
-              <DotLottiePlayer src={"/images/delete.lottie"} autoplay={true} />
-            ) : type === "uploaded" ? (
-              <DotLottiePlayer
-                src={"/images/uploaded.lottie"}
-                autoplay={true}
-              />
-            ) : (
-              <DotLottiePlayer src={"/warning.lottie"} autoplay={true} />
-            )
-            }
-        </div>
-        <div className="text-gray-800 text-sm md:text-xl py-2">{message}</div>
-        <button
-          onClick={handleClose}
-          className="text-gray-500 hover:text-gray-800 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1.414-9.293a1 1 0 0 1 1.414-1.414L10 8.586l1.414-1.414a1 1 0 0 1 1.414 1.414L11.414 10l1.414 1.414a1 1 0 0 1-1.414 1.414L10 11.414l-1.414 1.414a1 1 0 1 1 1.414 1.414L11.414 10l1.414 1.414a1 1 0 0 1-1.414 1.414L10 11.414l-1.414 1.414a1 1 0 0 1-1.414-1.414L8.586 10 7.172 8.586a1 1 0 0 1 1.414-1.414L10 8.586l1.414-1.414a1 1 0 0 1 1.414 1.414L11.414 10l1.414 1.414a1 1 0 0 1-1.414 1.414L10 11.414l-1.414 1.414a1 1 0 0 1-1.414-1.414L8.586 10 7.172 8.586a1 1 0 0 1 1.414-1.414L10 8.586l1.414-1.414a1 1 0 0 1 1.414 1.414L11.414 10l1.414 1.414a1 1 0 0 1-1.414 1.414L10 11.414l-1.414 1.414a1 1 0 0 1-1.414-1.414L8.586 10 7.172 8.586a1 1 0 0 1 0-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
-    )
-  );
-};
-
-
-export {  Notification };
 
 ```
 
@@ -2806,7 +2667,7 @@ import { useSession } from "next-auth/react";
 import { NotificationContext } from "../NotificationProvider";
 import { revalidatePath } from "next/cache";
 
-export default function PostForm() {
+export  function PostForm() {
   const { data: session } = useSession();
   const [content, setContent] = useState("");
   const {showNotification} = useContext(NotificationContext);
