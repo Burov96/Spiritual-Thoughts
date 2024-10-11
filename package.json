@@ -9,13 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-   "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "@dotlottie/react-player": "^1.6.19",
     "@prisma/client": "5.20.0",
     "bcryptjs": "^2.4.3",
     "next": "14.2.13",
-    "next-auth": "^4.24.8"
+    "next-auth": "^4.24.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20",
