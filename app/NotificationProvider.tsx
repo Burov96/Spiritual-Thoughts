@@ -2,13 +2,13 @@
 
 import React, { createContext, useReducer, useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { Notification } from "./components/Notification";
-import { NotificationProps, NotificationType, State, Action } from "./notificationTypes";
+import {  NotificationType, State, Action } from "./notificationTypes";
 
 // Create the Notification Context
 export const NotificationContext = createContext<{
   showNotification: (message: string, type: NotificationType, persistent?: boolean) => void;
   removeNotification: (id: number) => void;
-  notifications: NotificationProps[];
+  notifications: any[];
 } | undefined>(undefined);
 
 // Initial state for the reducer
@@ -124,7 +124,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }), [showNotification, removeNotification, state.notifications]);
   
   return (
-    <NotificationContext.Provider value={contextValue}>
+    <NotificationContext.Provider value ={contextValue}>
       {children}
       {state.notifications.map((notification) => (
         <Notification
@@ -137,7 +137,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
-
 // Custom hook to use the notification context
 export const useNotification = () => {
   const context = React.useContext(NotificationContext);

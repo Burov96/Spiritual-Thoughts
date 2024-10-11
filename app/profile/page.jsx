@@ -5,7 +5,7 @@ import Loading from "../components/Loading"
 import { useNotification } from "../NotificationProvider";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import {ProfileForm} from "@/app/components/ProfileForm"
+import {ProfileForm} from "../../app/components/ProfileForm"
 
 export default function Profile(){
   const {data:session, status} = useSession();

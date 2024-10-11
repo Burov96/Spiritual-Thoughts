@@ -2,7 +2,7 @@
 "use client"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import FollowButton from "@/app/components/FollowButton"
+import FollowButton from "../../components/FollowButton"
 
 export default function Profile() {
   const router = useRouter()

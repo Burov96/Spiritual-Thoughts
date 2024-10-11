@@ -4,11 +4,11 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import { DotLottiePlayer } from "@dotlottie/react-player";
-import { NotificationProps } from "../notificationTypes";
+import { NotificationContextProps } from "../notificationTypes";
 import Thrash from "./Thrash";
 import styles from "./Notification.module.css";
 
-const Notification: React.FC<NotificationProps> = ({
+const Notification: React.FC<any> = ({
   message,
   type,
   id,

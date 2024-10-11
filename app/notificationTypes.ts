@@ -17,10 +17,7 @@ export interface NotificationItem {
   persistent?: boolean;
 }
 
-export interface NotificationProps extends NotificationItem {
-  onRemove: (id: number) => void;
-  onHover: (id: number, isHovered: boolean) => void;
-}
+
 
 export type Action =
   | { type: "ADD_NOTIFICATION"; payload: Omit<NotificationItem, "onRemove" | "onHover"> }

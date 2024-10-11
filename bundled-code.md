@@ -620,7 +620,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }), [showNotification, removeNotification, state.notifications]);
   
   return (
-    <NotificationContext.Provider value={contextValue}>
+    <NotificationContext.Provider value ={contextValue}>
       {children}
       {state.notifications.map((notification) => (
         <Notification
@@ -633,7 +633,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
-
 // Custom hook to use the notification context
 export const useNotification = () => {
   const context = React.useContext(NotificationContext);
@@ -1000,7 +999,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions as any);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -1026,10 +1025,9 @@ export async function GET(request: Request) {
     return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }
-
 export async function POST(request: Request) {
   // Handle creating a new post
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions as any);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -1684,10 +1682,7 @@ export interface NotificationItem {
   persistent?: boolean;
 }
 
-export interface NotificationProps extends NotificationItem {
-  onRemove: (id: number) => void;
-  onHover: (id: number, isHovered: boolean) => void;
-}
+
 
 export type Action =
   | { type: "ADD_NOTIFICATION"; payload: Omit<NotificationItem, "onRemove" | "onHover"> }
@@ -1815,12 +1810,11 @@ interface PostProps {
   };
 }
 
-export default function Post({ post }: PostProps, { setRerenders }: { setRerenders: void }) {
+export default function Post({ post }: PostProps) {
   const { data: session } = useSession();
   const [influenced, setInfluenced] = useState(post.influences.length || 0);
   const [userInfluenced, setUserInfluenced] = useState(
-    post.influences.some((influence) => influence.user.id == session?.user?.id)
-  );
+    post.influences.some((influence) => influence.user.email === session?.user?.email)  );
   const { showNotification } = useNotification();
 const isAuthor = session?.user?.email === post.author.email;
   const handleInfluence = async () => {

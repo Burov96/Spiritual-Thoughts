@@ -1,7 +1,4 @@
-// app/context/NotificationContext.tsx
-
 "use client";
-
 import React, {
   createContext,
   ReactNode,
@@ -32,7 +29,6 @@ const notificationReducer = (state: State, action: Action): State => {
     case "ADD_NOTIFICATION": {
       const { message, type, persistent = false } = action.payload;
 
-      // Determine the smallest missing ID
       const sortedIds = [...state.notifications.map((n) => n.id)].sort(
         (a, b) => a - b
       );
@@ -47,13 +43,11 @@ const notificationReducer = (state: State, action: Action): State => {
       const id =
         smallestMissingId <= state.nextId ? smallestMissingId : state.nextId;
 
-      // Add the new notification
       const newNotifications: NotificationItem[] = [
         ...state.notifications,
         { id, message, type, persistent },
       ];
 
-      // Update available IDs and nextId
       const newAvailableIds = state.availableIds.filter(
         (existingId) => existingId !== id
       );
@@ -116,7 +110,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
   const timers = useRef<Map<number, NodeJS.Timeout>>(new Map());
   const hoveredNotifications = useRef<Set<number>>(new Set());
 
-  // Function to show a new notification
   const showNotification = useCallback(
     (message: string, type: NotificationType, persistent: boolean = false) => {
       const id = findSmallestMissingId(state.notifications.map((n) => n.id));
@@ -127,7 +120,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
         payload: { message, type, persistent },
       });
 
-      // Set timer to remove the notification after 3 seconds if not persistent
       if (!persistent) {
         const timer = setTimeout(() => {
           if (!hoveredNotifications.current.has(finalId)) {
@@ -142,7 +134,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     [state.notifications, state.nextId]
   );
 
-  // Function to remove a notification manually
   const removeNotification = useCallback((id: number) => {
     dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
     const timer = timers.current.get(id);
@@ -153,29 +144,32 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     hoveredNotifications.current.delete(id);
   }, []);
 
-  // Function to handle hover events
-  const handleNotificationHover = useCallback((id: number, isHovered: boolean) => {
-    if (isHovered) {
-      hoveredNotifications.current.add(id);
-      const timer = timers.current.get(id);
-      if (timer) {
-        clearTimeout(timer);
-        timers.current.delete(id);
-      }
-    } else {
-      hoveredNotifications.current.delete(id);
-      const shouldPersist = state.notifications.find((n) => n.id === id)?.persistent;
-      if (!shouldPersist) {
-        const newTimer = setTimeout(() => {
-          dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
+  const handleNotificationHover = useCallback(
+    (id: number, isHovered: boolean) => {
+      if (isHovered) {
+        hoveredNotifications.current.add(id);
+        const timer = timers.current.get(id);
+        if (timer) {
+          clearTimeout(timer);
           timers.current.delete(id);
-        }, 3000);
-        timers.current.set(id, newTimer);
+        }
+      } else {
+        hoveredNotifications.current.delete(id);
+        const shouldPersist = state.notifications.find(
+          (n) => n.id === id
+        )?.persistent;
+        if (!shouldPersist) {
+          const newTimer = setTimeout(() => {
+            dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
+            timers.current.delete(id);
+          }, 3000);
+          timers.current.set(id, newTimer);
+        }
       }
-    }
-  }, [state.notifications]);
+    },
+    [state.notifications]
+  );
 
-  // Cleanup all timers on unmount
   useEffect(() => {
     return () => {
       timers.current.forEach((timer) => clearTimeout(timer));
@@ -184,7 +178,6 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, []);
 
-  // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
       showNotification,
@@ -207,4 +200,15 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
       ))}
     </NotificationContext.Provider>
   );
+};
+
+// Custom hook to use the Notification Context
+export const useNotification = (): NotificationContextProps => {
+  const context = useContext(NotificationContext);
+  if (context === undefined) {
+    throw new Error(
+      "useNotification must be used within a NotificationProvider"
+    );
+  }
+  return context;
 };

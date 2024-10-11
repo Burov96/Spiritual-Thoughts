@@ -1,13 +1,20 @@
+// File: usePosts.ts
+
 "use client";
-import React from "react";
-import { useState, useTransition}  from 'react';
+
+import React, { useState, useTransition, useEffect } from 'react';
+
+interface Post {
+  id: number;
+  title: string;
+}
 
 export function usePosts() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const addPost = async (title:String) => {
+  const addPost = async (title: string) => {
     startTransition(async () => {
       try {
         const response = await fetch('/api/posts', {
@@ -20,15 +27,19 @@ export function usePosts() {
         if (!response.ok) {
           throw new Error('Failed to add post');
         }
-        const newPost = await response.json();
+        const newPost: Post = await response.json();
         setPosts((prevPosts) => [...prevPosts, newPost]);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     });
   };
 
-  const deletePost = async (id) => {
+  const deletePost = async (id: number) => {
     startTransition(async () => {
       try {
         const response = await fetch(`/api/posts/${id}`, {
@@ -39,23 +50,31 @@ export function usePosts() {
         }
         setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id));
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     });
   };
 
   // Fetch posts on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchPosts() {
       try {
         const response = await fetch('/api/posts');
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
         }
-        const data = await response.json();
+        const data: Post[] = await response.json();
         setPosts(data);
       } catch (err) {
-        setError(err.message);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       }
     }
     fetchPosts();

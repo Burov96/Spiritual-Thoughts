@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import Post from "@/app/components/Post";
-import PostForm from "@/app/components/PostForm";
-import { useNotification } from "@/app/NotificationProvider"; // Correct import
+import { Post } from "../components/Post";
+import { PostForm } from "../components/PostForm";
+import { useNotification } from "../NotificationProvider"; // Correct import
 import { useRouter } from "next/navigation";
-import Loading from "@/app/components/Loading";
+import { Loading } from "../components/Loading";
 
 export default function Feed() {
   const { showNotification } = useNotification(); // Use the hook directly

@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { NotificationContext } from "../NotificationProvider";
 import { revalidatePath } from "next/cache";
 
-export default function PostForm() {
+export  function PostForm() {
   const { data: session } = useSession();
   const [content, setContent] = useState("");
   const {showNotification} = useContext(NotificationContext);

@@ -1,7 +1,7 @@
 // app/api/upload-avatar/route.js
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import prisma from "../../../lib/prisma";
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);

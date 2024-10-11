@@ -6,8 +6,8 @@ import { useSession } from "next-auth/react";
 import { useState, useContext } from "react";
 import Image from "next/image";
 import Like from "./Like";
-import { useNotification } from "@/app/hooks/useNotification";
 import { revalidatePath } from "next/cache";
+import { useNotification } from "../NotificationProvider";
 
 export interface User {
   id: number;
@@ -68,7 +68,7 @@ interface PostProps {
   };
 }
 
-export default function Post({ post }: PostProps) {
+export  function Post({ post }: PostProps) {
   const { data: session } = useSession();
   const [influenced, setInfluenced] = useState(post.influences.length || 0);
   const [userInfluenced, setUserInfluenced] = useState(
