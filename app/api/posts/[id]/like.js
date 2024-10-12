@@ -1,4 +1,4 @@
-"use client"
+
 
 // pages/api/posts/[id]/like.js
 import { getSession } from "next-auth/react"

@@ -1,4 +1,4 @@
-// pages/api/posts/index.js
+
 import prisma from "../../../../prisma"
 
 export default async function handler(req, res) {
