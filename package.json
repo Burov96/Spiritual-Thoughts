@@ -1,9 +1,10 @@
 {
   "name": "movies",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "vercel-build": "node vercel-build.js",
+    "vercel-build": "node vercel-build.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
