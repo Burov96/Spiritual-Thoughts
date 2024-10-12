@@ -1,31 +1,20 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../../../app/api/auth/[...nextauth]/route";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
-import { NextAuthOptions } from "next-auth";
-import { Session } from "next-auth";
+import { authOptions } from "../../../../../lib/authOptions";
 
-export interface CustomSession extends Session {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-
-
-  const session = await getServerSession(authOptions as NextAuthOptions);
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
   if (!session) {
     console.log("Unauthorized access to like route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const postId = Number(params.id);
+  // Extract post ID from the request URL
+  const url = new URL(request.url);
+  const postId = Number(url.pathname.split('/').pop());
 
   try {
-    // Check if the post exists
     const post = await prisma.post.findUnique({
       where: { id: postId },
     });
@@ -34,35 +23,32 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
 
-    // Toggle like: if already liked, remove; else, add
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId: postId,
-        userId: (session as CustomSession).user.id,
-        type: "like", // Assuming 'type' distinguishes like, dislike, etc.
+        userId: session?.user.id,
+        type: "like",
       },
     });
 
     if (existingInfluence) {
-      // Unlike the post
       await prisma.influence.delete({
         where: { id: existingInfluence.id },
       });
       console.log(`Post unliked with ID: ${postId}`);
       return NextResponse.json({ message: "Post unliked" }, { status: 200 });
     } else {
-      // Like the post
       await prisma.influence.create({
         data: {
           type: "like",
           postId: postId,
-          userId: (session as CustomSession).user.id,
+          userId: session.user.id,
         },
       });
       console.log(`Post liked with ID: ${postId}`);
       return NextResponse.json({ message: "Post liked" }, { status: 201 });
     }
-  } catch (error: Error | any) {
+  } catch (error) {
     console.error("Error liking/unliking post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }

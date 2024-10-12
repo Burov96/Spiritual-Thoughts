@@ -114,12 +114,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     (message: string, type: NotificationType, persistent: boolean = false) => {
       const id = findSmallestMissingId(state.notifications.map((n) => n.id));
       const finalId = id <= state.nextId ? id : state.nextId;
-
+  
+      // Include 'id' in the payload
       dispatch({
         type: "ADD_NOTIFICATION",
-        payload: { message, type, persistent },
+        payload: { id: finalId, message, type, persistent },
       });
-
+  
       if (!persistent) {
         const timer = setTimeout(() => {
           if (!hoveredNotifications.current.has(finalId)) {
@@ -127,12 +128,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
             timers.current.delete(finalId);
           }
         }, 3000);
-
+  
         timers.current.set(finalId, timer);
       }
     },
     [state.notifications, state.nextId]
   );
+  
 
   const removeNotification = useCallback((id: number) => {
     dispatch({ type: "REMOVE_NOTIFICATION", payload: id });

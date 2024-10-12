@@ -1,10 +1,22 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import prisma from "../../../../lib/prisma";
+import { authOptions } from "../../../../lib/authOptions";
+
+// Define a custom session type
+interface CustomSession {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  // Assert that the session is of type CustomSession
+  const session = (await getServerSession(authOptions)) as CustomSession;
+
+  if (!session || !session.user.id) {
     console.log("Unauthorized access to influence route");
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }

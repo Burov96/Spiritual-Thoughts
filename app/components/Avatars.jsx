@@ -1,4 +1,13 @@
-export default function Avatar({ src }) {
-    return <img src={src || "/default-avatar.png"} alt="User Avatar" className="w-12 h-12 rounded-full" />
-  }
-  
+// app/components/Avatars.jsx
+import Image from "next/image";
+import React from "react";
+
+const Avatars = () => {
+  return (
+    <div>
+      <Image src="/images/avatar.png" alt="Avatar" width={100} height={100} />
+    </div>
+  );
+};
+
+export default Avatars;

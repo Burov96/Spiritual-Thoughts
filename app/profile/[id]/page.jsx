@@ -3,6 +3,8 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import FollowButton from "../../components/FollowButton"
+import Image from "next/image"
+import { Loading } from "../../components/Loading"
 
 export default function Profile() {
   const router = useRouter()
@@ -17,11 +19,11 @@ export default function Profile() {
     }
   }, [id])
 
-  if (!user) return <p>Loading...</p>
+  if (!user) return <Loading />
 
   return (
     <div className="max-w-md mx-auto p-4 border rounded shadow">
-      <img src={user.avatar || "/default-avatar.png"} alt="Avatar" className="w-24 h-24 rounded-full mx-auto" />
+      <Image height={96} width={96} src={user.avatar || "/default-avatar.png"} alt="Avatar" className="rounded-full mx-auto" />
       <h2 className="text-xl text-center mt-2">{user.name}</h2>
       <p className="text-center text-gray-500">{user.email}</p>
       <div className="mt-4">

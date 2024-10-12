@@ -1,14 +1,22 @@
-import NextAuth from "next-auth";
+// lib/authOptions.ts
+import { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "../../../../lib/prisma";
+import prisma from "../lib/prisma";
 import { compare } from "bcryptjs";
 
-export const authOptions = {
+interface SessionUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+export const authOptions: NextAuthOptions = {
   providers: [
     GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
+      clientId: process.env.GITHUB_ID as string,
+      clientSecret: process.env.GITHUB_SECRET as string,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -17,12 +25,16 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) {
+          return null;
+        }
         const user = await prisma.user.findUnique({
           where: { email: credentials.username },
         });
 
         if (user && (await compare(credentials.password, user.password))) {
-          const { password, ...userWithoutPassword } = user;
+          const { password: _password, ...userWithoutPassword } = user; // Prefix with _
+          console.log(_password.substring(0,2))
           return userWithoutPassword;
         }
         return null;
@@ -39,13 +51,9 @@ export const authOptions = {
   callbacks: {
     session: async ({ session, token }) => {
       if (token && token.sub) {
-        session.user.id = token.sub;
+        (session.user as SessionUser).id = token.sub;
       }
       return session;
     },
   },
 };
-
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };

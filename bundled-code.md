@@ -9,19 +9,21 @@ import { useSession } from "next-auth/react";
 import { Post } from "../components/Post";
 import { PostForm } from "../components/PostForm";
 import { useNotification } from "../NotificationProvider"; // Correct import
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Loading } from "../components/Loading";
 
 export default function Feed() {
   const { showNotification } = useNotification(); // Use the hook directly
+  const pathname = usePathname();
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
+  console.log(session)
 
   useEffect(() => {
-    if (status === "unauthenticated" && router.pathname !== "/") {
+    if (status === "unauthenticated" && pathname !== "/") {
       showNotification("First login to see the feed", "failure");
-      router.push("/login");
+      router.push("/auth/signin");
     } else if (status === "authenticated") {
       fetch("/api/posts")
         .then((res) => res.json())
@@ -30,7 +32,7 @@ export default function Feed() {
           showNotification("Failed to load posts", "failure");
         });
     }
-  }, [status, router.pathname, showNotification]);
+  }, [status, pathname, showNotification]);
 
   if (status === "loading") {
     return <Loading />;
@@ -321,7 +323,7 @@ export const useNotification = () => {
 
 "use client";
 
-import React, { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 
 interface Post {
   id: number;
@@ -415,7 +417,7 @@ export function usePosts() {
 'use client'
 
 import { useRouter } from "next/navigation";
-import Loading from "../components/Loading"
+import { Loading } from "../components/Loading"
 import { useNotification } from "../NotificationProvider";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -458,6 +460,8 @@ export default function Profile(){
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import FollowButton from "../../components/FollowButton"
+import Image from "next/image"
+import { Loading } from "../../components/Loading"
 
 export default function Profile() {
   const router = useRouter()
@@ -472,11 +476,11 @@ export default function Profile() {
     }
   }, [id])
 
-  if (!user) return <p>Loading...</p>
+  if (!user) return <Loading />
 
   return (
     <div className="max-w-md mx-auto p-4 border rounded shadow">
-      <img src={user.avatar || "/default-avatar.png"} alt="Avatar" className="w-24 h-24 rounded-full mx-auto" />
+      <Image height={96} width={96} src={user.avatar || "/default-avatar.png"} alt="Avatar" className="rounded-full mx-auto" />
       <h2 className="text-xl text-center mt-2">{user.name}</h2>
       <p className="text-center text-gray-500">{user.email}</p>
       <div className="mt-4">
@@ -522,13 +526,13 @@ export default function ProtectedPage() {
 
 import React, { createContext, useReducer, useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { Notification } from "./components/Notification";
-import {  NotificationType, State, Action } from "./notificationTypes";
+import {  NotificationType, State, Action, NotificationItem } from "./notificationTypes";
 
 // Create the Notification Context
 export const NotificationContext = createContext<{
   showNotification: (message: string, type: NotificationType, persistent?: boolean) => void;
   removeNotification: (id: number) => void;
-  notifications: any[];
+  notifications: NotificationItem[];
 } | undefined>(undefined);
 
 // Initial state for the reducer
@@ -630,12 +634,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // Clear all timers on unmount
   useEffect(() => {
+    const currentTimers = Array.from(timers.current.values());
     return () => {
-      timers.current.forEach(clearTimeout);
-      timers.current.clear();
+      currentTimers.forEach(clearTimeout);
     };
   }, []);
-
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     showNotification,
@@ -715,10 +718,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ## File: app/api/users/route.js
 ```js
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
 import prisma from "../../../lib/prisma";
+import { authOptions } from "../../../lib/authOptions";
 
-export async function GET(request) {
+export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
@@ -856,11 +859,11 @@ export default async function handler(req, res) {
 ## File: app/api/profile/route.js
 ```js
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route";
 import prisma from "../../../lib/prisma";
 import { NextResponse } from "next/server";
+import { authOptions } from "../../../lib/authOptions";
 
-export async function GET(request) {
+export async function GET() {
   const session = await getServerSession(authOptions);
   console.log("Session:", session);
 
@@ -939,8 +942,8 @@ export async function PUT(request) {
 ```js
 // app/api/upload-avatar/route.js
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
 import prisma from "../../../lib/prisma";
+import { authOptions } from "../../../lib/authOptions";
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);
@@ -965,11 +968,14 @@ export async function POST(request) {
 // app/api/posts/route.ts
 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../app/api/auth/[...nextauth]/route";
 import prisma from "../../../lib/prisma";
+import { NextAuthOptions } from "next-auth";
+import { CustomSession } from "./[id]/influence/route";
+import { authOptions } from "../../../lib/authOptions";
 
-export async function GET(request: Request) {
-  const session = await getServerSession(authOptions as any);
+
+export async function GET() {
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -997,7 +1003,7 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   // Handle creating a new post
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -1012,7 +1018,7 @@ export async function POST(request: Request) {
     const post = await prisma.post.create({
       data: {
         content,
-        author: { connect: { email: session.user.email } },
+        author: { connect: { email: (session as CustomSession).user.email } },
       },
     });
 
@@ -1028,12 +1034,24 @@ export async function POST(request: Request) {
 ## File: app/api/posts/[id]/influence/route.ts
 ```ts
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../../../app/api/auth/[...nextauth]/route";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
+import { NextAuthOptions } from "next-auth";
+import { Session } from "next-auth";
+import { authOptions } from "../../../../../lib/authOptions";
 
+export interface CustomSession extends Session {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions as any);
+
+
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     console.log("Unauthorized access to like route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -1055,7 +1073,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId: postId,
-        userId: session.user?.id * 1,
+        userId: (session as CustomSession).user.id,
         type: "like", // Assuming 'type' distinguishes like, dislike, etc.
       },
     });
@@ -1073,13 +1091,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
         data: {
           type: "like",
           postId: postId,
-          userId: session.user?.id * 1,
+          userId: (session as CustomSession).user.id,
         },
       });
       console.log(`Post liked with ID: ${postId}`);
       return NextResponse.json({ message: "Post liked" }, { status: 201 });
     }
-  } catch (error: any) {
+  } catch (error: Error | any) {
     console.error("Error liking/unliking post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
@@ -1174,12 +1192,13 @@ export default async function handler(req, res) {
 ## File: app/api/posts/[id]/delete/route.ts
 ```ts
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../auth/[...nextauth]/route";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
+import { NextAuthOptions } from "next-auth";
+import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     console.log("Unauthorized access to delete route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -1198,9 +1217,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
 
-    if (post.authorId != session.user?.id) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
+    // if (post.authorId != session.user?.id) {
+    //   return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    // }
 
     // Delete related influences
     await prisma.influence.deleteMany({
@@ -1214,7 +1233,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     console.log(`Post deleted with ID: ${postId}`);
     return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: Error | any) {
     console.error("Error deleting post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
@@ -1225,8 +1244,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 ## File: app/api/posts/[id]/influence.ts
 ```ts
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import prisma from "../../../../lib/prisma";
+import { authOptions } from "../../../../lib/authOptions";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -1279,55 +1298,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
 ```
 
-## File: app/api/auth/[...nextauth]/route.js
-```js
+## File: app/api/auth/[...nextauth]/route.ts
+```ts
 import NextAuth from "next-auth";
-import GithubProvider from "next-auth/providers/github";
-import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "../../../../lib/prisma";
-import { compare } from "bcryptjs";
-
-export const authOptions = {
-  providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-    }),
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        username: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.username },
-        });
-
-        if (user && (await compare(credentials.password, user.password))) {
-          const { password, ...userWithoutPassword } = user;
-          return userWithoutPassword;
-        }
-        return null;
-      },
-    }),
-  ],
-  session: {
-    strategy: "jwt",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/auth/signin",
-  },
-  callbacks: {
-    session: async ({ session, token }) => {
-      if (token && token.sub) {
-        session.user.id = token.sub;
-      }
-      return session;
-    },
-  },
-};
+import { authOptions } from "../../../../lib/authOptions"; // Adjust the path as necessary
 
 const handler = NextAuth(authOptions);
 
@@ -1398,13 +1372,12 @@ export default async function handler(req, res) {
 ```jsx
 "use client";
 
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NotificationContext } from "../../NotificationProvider";
 
 export default function SignIn() {
-  const { data: session, status } = useSession();
   const { showNotification } = useContext(NotificationContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -1478,6 +1451,8 @@ export default function Register() {
   const router = useRouter();
 
   const { data: session, status } = useSession();
+
+  console.log(session)
 
   if (status === "authenticated") {
     router.push("/feed");
@@ -1715,7 +1690,7 @@ export function useOutsideClick(ref, callback, exception, exception2) {
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Like from "./Like";
 import { revalidatePath } from "next/cache";
@@ -1871,24 +1846,28 @@ const isAuthor = session?.user?.email === post.author.email;
 
 ## File: app/components/Notification.tsx
 ```tsx
-// app/components/Notification.tsx
-
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
 import { DotLottiePlayer } from "@dotlottie/react-player";
-import { NotificationContextProps } from "../notificationTypes";
 import Thrash from "./Thrash";
 import styles from "./Notification.module.css";
 
-const Notification: React.FC<any> = ({
+interface NotificationProps {
+  message: string;
+  type: string;
+  id: number;
+  onRemove: (id: number) => void;
+  onHover: (id: number, isHovered: boolean) => void;
+}
+
+const Notification = ({
   message,
   type,
   id,
   onRemove,
   onHover,
-  persistent = false,
-}) => {
+}: NotificationProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -2009,7 +1988,6 @@ import { useSession, signOut } from "next-auth/react";
 import { useContext, useState, useRef } from "react";
 import { NotificationContext } from "../NotificationProvider";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Hamburger from "./Hamburger";
 import { useOutsideClick } from "../utils/outsideClidkFunctionRuner";
 
@@ -2017,7 +1995,6 @@ export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session } = useSession();
   const { showNotification } = useContext(NotificationContext);
-  const router = useRouter();
   const menuRef = useRef(null);
   const exception = useRef(null);
   const userMenuException = useRef(null);
@@ -2109,7 +2086,7 @@ import { useState } from "react"
 export default function AvatarUpload() {
   const [file, setFile] = useState(null)
 
-  const handleUpload = async (e) => {
+  const handleUpload = async () => {
     const formData = new FormData()
     formData.append("file", file)
     const res = await fetch("/api/upload-avatar", {
@@ -2117,6 +2094,7 @@ export default function AvatarUpload() {
       body: formData,
     })
     const data = await res.json()
+    console.log(data)
     // Update user profile with avatar URL
   }
 
@@ -2158,9 +2136,9 @@ interface LoadingProps {
   height?: number;
 }
 
-export const Loading: React.FC<LoadingProps> = ({ width = 700, height = 700 }) => {
+const Loading = ({ width = 700, height = 700 }: LoadingProps) => {
   return (
-    <div className=" flex justify-center align-middle loading-container">
+    <div className="flex justify-center align-middle loading-container">
       <DotLottiePlayer
         src="/images/loading.lottie"
         autoplay
@@ -2171,7 +2149,8 @@ export const Loading: React.FC<LoadingProps> = ({ width = 700, height = 700 }) =
   );
 };
 
-export default Loading;
+export {Loading};
+
 ```
 
 ## File: app/components/Footer.jsx
@@ -2228,10 +2207,20 @@ export default Thrash;
 
 ## File: app/components/Avatars.jsx
 ```jsx
-export default function Avatar({ src }) {
-    return <img src={src || "/default-avatar.png"} alt="User Avatar" className="w-12 h-12 rounded-full" />
-  }
-  
+// app/components/Avatars.jsx
+import Image from "next/image";
+import React from "react";
+
+const Avatars = () => {
+  return (
+    <div>
+      <Image src="/images/avatar.png" alt="Avatar" width={100} height={100} />
+    </div>
+  );
+};
+
+export default Avatars;
+
 ```
 
 ## File: app/components/ProfileForm.jsx
@@ -2394,6 +2383,7 @@ export default function SessionProviderWrapper({ children }) {
 
 ## File: app/components/Hamburger.tsx
 ```tsx
+// app/components/Hamburger.tsx
 import { DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
 import React, { useEffect, useRef } from 'react';
 
@@ -2405,24 +2395,18 @@ const Hamburger: React.FC<BurgerOpened> = ({ open }) => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
 
   useEffect(() => {
-        open?playerRef.current?.playSegments([30, 60], true):playerRef.current?.playSegments([40, 20], true);
-    // if (playerRef.current) {
-    //   if (open) {
-    //     console.log(
-    //         'otvori sa'
-    //     )
-    //     playerRef.current.playSegments([0, 20], true);
-    //   } else {
-    //     playerRef.current.playSegments([20,0], true);
-    //   }
-    // }
+    if (open) {
+      playerRef.current?.playSegments([30, 60], true);
+    } else {
+      playerRef.current?.playSegments([40, 20], true);
+    }
   }, [open]);
 
   return (
-    <div className='w-20 '>
+    <div className='w-20'>
       <DotLottiePlayer
         ref={playerRef}
-        src={"images/hamburger.lottie"}
+        src="images/hamburger.lottie"
         autoplay={false}
         loop={false}
       />
@@ -2443,23 +2427,27 @@ interface LikeProps {
   userInfluenced: boolean;
 }
 
-const Like: React.FC<LikeProps> = ({ userInfluenced }) => {
+const Like = ({ userInfluenced }: LikeProps) => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
 
   useEffect(() => {
     if (playerRef.current) {
-setTimeout(() => {
-  userInfluenced?playerRef.current?.playSegments([65, 67], true):playerRef.current?.playSegments([10, 0], true);
-}, 70);
+      setTimeout(() => {
+        if (userInfluenced) {
+          playerRef.current?.playSegments([65, 67], true);
+        } else {
+          playerRef.current?.playSegments([10, 0], true);
+        }
+      }, 70);
     }
-  }, []);
+  }, [userInfluenced]);
 
   useEffect(() => {
     if (playerRef.current) {
       if (userInfluenced) {
         playerRef.current.playSegments([0, 67], true);
       } else {
-        playerRef.current.playSegments([40,0], true);
+        playerRef.current.playSegments([40, 0], true);
       }
     }
   }, [userInfluenced]);
@@ -2542,106 +2530,6 @@ export default function RegisterForm() {
 
 ```
 
-## File: app/components/lottieExample.jsx
-```jsx
-import { DotLottiePlayer } from "@dotlottie/react-player";
-import React, { useState, useEffect } from "react";
-import ReactDOM from "react-dom";
-
-export const LottieExample = () => {
-  const [dotLottie, setDotLottie] = useState(null);
-  const [status, setStatus] = useState("idle");
-  const [currentFrame, setCurrentFrame] = useState(0);
-  const [loop, setLoop] = useState(true);
-
-  // Calculating total frames and progress
-  const totalFrames = dotLottie?.isLoaded ? dotLottie.totalFrames : 0;
-  const progress = dotLottie?.isLoaded ? (currentFrame / totalFrames) * 100 : 0;
-
-  // Effect for handling dotLottie events
-  useEffect(() => {
-    // Event handlers
-    const onFrameChange = (event) => setCurrentFrame(event.currentFrame);
-    const onPlay = () => setStatus("playing");
-    const onPause = () => setStatus("paused");
-    const onStop = () => setStatus("stopped");
-    const onComplete = () => setStatus("completed");
-
-    // Registering event listeners
-    if (dotLottie) {
-      dotLottie.addEventListener("frame", onFrameChange);
-      dotLottie.addEventListener("play", onPlay);
-      dotLottie.addEventListener("pause", onPause);
-      dotLottie.addEventListener("stop", onStop);
-      dotLottie.addEventListener("complete", onComplete);
-    }
-
-    // Cleanup
-    return () => {
-      if (dotLottie) {
-        dotLottie.removeEventListener("frame", onFrameChange);
-        dotLottie.removeEventListener("play", onPlay);
-        dotLottie.removeEventListener("pause", onPause);
-        dotLottie.removeEventListener("stop", onStop);
-        dotLottie.removeEventListener("complete", onComplete);
-      }
-    };
-  }, [dotLottie]);
-
-  // Play or pause animation
-  const playOrPause = () => {
-    status === "playing" ? dotLottie?.pause() : dotLottie?.play();
-  };
-
-  // Toggle loop state
-  const toggleLoop = (event) => setLoop(event.target.checked);
-
-  // Seek functionality
-  const onSeek = (event) => {
-    const newFrame = (event.target.value / 100) * totalFrames;
-    dotLottie.setFrame(newFrame);
-  };
-
-  const onSeekStart = () => status === "playing" && dotLottie.pause();
-  const onSeekEnd = () => status !== "playing" && dotLottie.play();
-
-  return (
-    <div className="container">
-      <DotLottiePlayer
-        dotLottieRefCallback={setDotLottie}
-        src="https://lottie.host/63e43fb7-61be-486f-aef2-622b144f7fc1/2m8UGcP8KR.json"
-        autoplay
-        loop={loop}
-        style={{ maxWidth: "600px" }}
-      />
-      <a href="https://lottiefiles.com/animations/hiding-lolo-eH80VLpL27" target="_blank">
-        Lolo Sticker - Hiding Lolo
-      </a>
-      <div>
-        <button onClick={playOrPause}>
-          {status === "playing" ? "⏸️" : "▶️"}
-        </button>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="0.01"
-          value={progress}
-          onChange={onSeek}
-          onMouseDown={onSeekStart}
-          onMouseUp={onSeekEnd}
-        />
-        <span>
-          {Math.round(currentFrame)}/{totalFrames}
-        </span>
-        <input onChange={toggleLoop} checked={loop} type="checkbox" />
-      </div>
-    </div>
-  );
-};
-
-```
-
 ## File: app/components/Button.jsx
 ```jsx
 export default function Button({ children, onClick, className }) {
@@ -2664,24 +2552,33 @@ export default function Button({ children, onClick, className }) {
 import { useContext, useState } from "react";
 import { useSession } from "next-auth/react";
 import { NotificationContext } from "../NotificationProvider";
-import { revalidatePath } from "next/cache";
 
-export  function PostForm() {
+export function PostForm() {
   const { data: session } = useSession();
   const [content, setContent] = useState("");
-  const {showNotification} = useContext(NotificationContext);
+  const { showNotification } = useContext(NotificationContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setContent((prev)=>prev.trim())
-    content.length < 1 && showNotification("Please enter a thought first", 'failure');
-    await fetch("/api/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-    showNotification("Thought posted successfully", 'success');
-    setContent("");
+    setContent((prev) => prev.trim());
+
+    if (content.length < 1) {
+      showNotification("Please enter a thought first", 'failure');
+      return;
+    }
+
+    try {
+      await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      showNotification("Thought posted successfully", 'success');
+      setContent("");
+    } catch (error) {
+      console.error("Error posting thought:", error);
+      showNotification("Failed to post thought", 'failure');
+    }
   };
 
   if (!session) return null;
@@ -2757,7 +2654,7 @@ export default function Interests() {
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Loading from "./components/Loading";
+import {Loading} from "./components/Loading";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -2775,7 +2672,7 @@ export default function HomePage() {
       {session ? (
         <>
           <p className="text-lg mb-8 text-center max-w-md">
-            Hello, {session.user.name}! Ready to share your spiritual thoughts?
+            Hello, {session.user?.name}! Ready to share your spiritual thoughts?
           </p>
           <Link
             href="/feed"
@@ -2828,6 +2725,69 @@ const prisma =
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;
+
+```
+
+## File: lib/authOptions.ts
+```ts
+// lib/authOptions.ts
+import { NextAuthOptions } from "next-auth";
+import GithubProvider from "next-auth/providers/github";
+import CredentialsProvider from "next-auth/providers/credentials";
+import prisma from "../lib/prisma";
+import { compare } from "bcryptjs";
+
+interface SessionUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    GithubProvider({
+      clientId: process.env.GITHUB_ID as string,
+      clientSecret: process.env.GITHUB_SECRET as string,
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        username: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.username || !credentials?.password) {
+          return null;
+        }
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.username },
+        });
+
+        if (user && (await compare(credentials.password, user.password))) {
+          const { password: _password, ...userWithoutPassword } = user; // Prefix with _
+          return userWithoutPassword;
+        }
+        return null;
+      },
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/auth/signin",
+  },
+  callbacks: {
+    session: async ({ session, token }) => {
+      if (token && token.sub) {
+        (session.user as SessionUser).id = token.sub;
+      }
+      return session;
+    },
+  },
+};
 
 ```
 

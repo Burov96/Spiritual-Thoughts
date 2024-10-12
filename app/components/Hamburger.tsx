@@ -1,11 +1,12 @@
+// app/components/Hamburger.tsx
 import { DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
 import React, { useEffect, useRef } from 'react';
 
-interface HamburgerProps {
+interface BurgerOpened {
   open: boolean;
 }
 
-const Hamburger = ({ open }: HamburgerProps): JSX.Element => {
+const Hamburger: React.FC<BurgerOpened> = ({ open }) => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
 
   useEffect(() => {

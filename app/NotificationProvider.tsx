@@ -110,12 +110,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // Clear all timers on unmount
   useEffect(() => {
+    const currentTimers = Array.from(timers.current.values());
     return () => {
-      timers.current.forEach(clearTimeout);
-      timers.current.clear();
+      currentTimers.forEach(clearTimeout);
     };
   }, []);
-
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
     showNotification,

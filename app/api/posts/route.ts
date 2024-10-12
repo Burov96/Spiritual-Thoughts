@@ -1,14 +1,21 @@
-// app/api/posts/route.ts
+// Define a CustomSession interface
+interface CustomSession {
+  user: {
+    id: string;
+    name?: string | null;
+    email: string;
+    image?: string | null;
+  };
+}
 
+// Example usage in your API route
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../app/api/auth/[...nextauth]/route";
 import prisma from "../../../lib/prisma";
 import { NextAuthOptions } from "next-auth";
-import { CustomSession } from "./[id]/influence/route";
-
+import { authOptions } from "../../../lib/authOptions";
 
 export async function GET() {
-  const session = await getServerSession(authOptions as NextAuthOptions);
+  const session = await getServerSession(authOptions as NextAuthOptions) as CustomSession;
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -34,9 +41,9 @@ export async function GET() {
     return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }
+
 export async function POST(request: Request) {
-  // Handle creating a new post
-  const session = await getServerSession(authOptions as NextAuthOptions);
+  const session = await getServerSession(authOptions as NextAuthOptions) as CustomSession;
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -51,7 +58,7 @@ export async function POST(request: Request) {
     const post = await prisma.post.create({
       data: {
         content,
-        author: { connect: { email: (session as CustomSession).user.email } },
+        author: { connect: { email: session.user.email } },
       },
     });
 
