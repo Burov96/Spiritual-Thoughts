@@ -2,13 +2,13 @@
 
 import React, { createContext, useReducer, useMemo, useCallback, useState, useRef, useEffect } from "react";
 import { Notification } from "./components/Notification";
-import {  NotificationType, State, Action } from "./notificationTypes";
+import {  NotificationType, State, Action, NotificationItem } from "./notificationTypes";
 
 // Create the Notification Context
 export const NotificationContext = createContext<{
   showNotification: (message: string, type: NotificationType, persistent?: boolean) => void;
   removeNotification: (id: number) => void;
-  notifications: any[];
+  notifications: NotificationItem[];
 } | undefined>(undefined);
 
 // Initial state for the reducer

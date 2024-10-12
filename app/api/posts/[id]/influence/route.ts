@@ -2,9 +2,21 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../../app/api/auth/[...nextauth]/route";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
+import { NextAuthOptions } from "next-auth";
+import { Session } from "next-auth";
 
+export interface CustomSession extends Session {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions as any);
+
+
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     console.log("Unauthorized access to like route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -26,7 +38,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId: postId,
-        userId: session.user?.id * 1,
+        userId: (session as CustomSession).user.id,
         type: "like", // Assuming 'type' distinguishes like, dislike, etc.
       },
     });
@@ -44,7 +56,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         data: {
           type: "like",
           postId: postId,
-          userId: session.user?.id * 1,
+          userId: (session as CustomSession).user.id,
         },
       });
       console.log(`Post liked with ID: ${postId}`);

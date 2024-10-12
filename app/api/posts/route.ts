@@ -3,9 +3,12 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../app/api/auth/[...nextauth]/route";
 import prisma from "../../../lib/prisma";
+import { NextAuthOptions } from "next-auth";
+import { CustomSession } from "./[id]/influence/route";
+
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -48,7 +51,7 @@ export async function POST(request: Request) {
     const post = await prisma.post.create({
       data: {
         content,
-        author: { connect: { email: session.user.email } },
+        author: { connect: { email: (session as CustomSession).user.email } },
       },
     });
 
