@@ -3,7 +3,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Like from "./Like";
 import { revalidatePath } from "next/cache";

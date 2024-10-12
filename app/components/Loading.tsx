@@ -6,9 +6,9 @@ interface LoadingProps {
   height?: number;
 }
 
-export const Loading: React.FC<LoadingProps> = ({ width = 700, height = 700 }) => {
+const Loading = ({ width = 700, height = 700 }: LoadingProps) => {
   return (
-    <div className=" flex justify-center align-middle loading-container">
+    <div className="flex justify-center align-middle loading-container">
       <DotLottiePlayer
         src="/images/loading.lottie"
         autoplay

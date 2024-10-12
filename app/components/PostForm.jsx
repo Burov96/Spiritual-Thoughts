@@ -3,24 +3,33 @@
 import { useContext, useState } from "react";
 import { useSession } from "next-auth/react";
 import { NotificationContext } from "../NotificationProvider";
-import { revalidatePath } from "next/cache";
 
-export  function PostForm() {
+export function PostForm() {
   const { data: session } = useSession();
   const [content, setContent] = useState("");
-  const {showNotification} = useContext(NotificationContext);
+  const { showNotification } = useContext(NotificationContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setContent((prev)=>prev.trim())
-    content.length < 1 && showNotification("Please enter a thought first", 'failure');
-    await fetch("/api/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-    showNotification("Thought posted successfully", 'success');
-    setContent("");
+    setContent((prev) => prev.trim());
+
+    if (content.length < 1) {
+      showNotification("Please enter a thought first", 'failure');
+      return;
+    }
+
+    try {
+      await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      showNotification("Thought posted successfully", 'success');
+      setContent("");
+    } catch (error) {
+      console.error("Error posting thought:", error);
+      showNotification("Failed to post thought", 'failure');
+    }
   };
 
   if (!session) return null;

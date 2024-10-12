@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 
 interface Post {
   id: number;

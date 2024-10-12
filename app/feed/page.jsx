@@ -14,6 +14,7 @@ export default function Feed() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
+  console.log(session)
 
   useEffect(() => {
     if (status === "unauthenticated" && pathname !== "/") {

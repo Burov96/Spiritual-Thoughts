@@ -4,7 +4,6 @@ import { useSession, signOut } from "next-auth/react";
 import { useContext, useState, useRef } from "react";
 import { NotificationContext } from "../NotificationProvider";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Hamburger from "./Hamburger";
 import { useOutsideClick } from "../utils/outsideClidkFunctionRuner";
 
@@ -12,7 +11,6 @@ export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data: session } = useSession();
   const { showNotification } = useContext(NotificationContext);
-  const router = useRouter();
   const menuRef = useRef(null);
   const exception = useRef(null);
   const userMenuException = useRef(null);

@@ -5,23 +5,27 @@ interface LikeProps {
   userInfluenced: boolean;
 }
 
-const Like: React.FC<LikeProps> = ({ userInfluenced }) => {
+const Like = ({ userInfluenced }: LikeProps) => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
 
   useEffect(() => {
     if (playerRef.current) {
-setTimeout(() => {
-  userInfluenced?playerRef.current?.playSegments([65, 67], true):playerRef.current?.playSegments([10, 0], true);
-}, 70);
+      setTimeout(() => {
+        if (userInfluenced) {
+          playerRef.current?.playSegments([65, 67], true);
+        } else {
+          playerRef.current?.playSegments([10, 0], true);
+        }
+      }, 70);
     }
-  }, []);
+  }, [userInfluenced]);
 
   useEffect(() => {
     if (playerRef.current) {
       if (userInfluenced) {
         playerRef.current.playSegments([0, 67], true);
       } else {
-        playerRef.current.playSegments([40,0], true);
+        playerRef.current.playSegments([40, 0], true);
       }
     }
   }, [userInfluenced]);

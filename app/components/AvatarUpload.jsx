@@ -5,7 +5,7 @@ import { useState } from "react"
 export default function AvatarUpload() {
   const [file, setFile] = useState(null)
 
-  const handleUpload = async (e) => {
+  const handleUpload = async () => {
     const formData = new FormData()
     formData.append("file", file)
     const res = await fetch("/api/upload-avatar", {
@@ -13,6 +13,7 @@ export default function AvatarUpload() {
       body: formData,
     })
     const data = await res.json()
+    console.log(data)
     // Update user profile with avatar URL
   }
 

@@ -62,7 +62,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       console.log(`Post liked with ID: ${postId}`);
       return NextResponse.json({ message: "Post liked" }, { status: 201 });
     }
-  } catch (error: any) {
+  } catch (error: Error | any) {
     console.error("Error liking/unliking post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }

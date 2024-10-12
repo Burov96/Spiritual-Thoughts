@@ -40,7 +40,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     console.log(`Post deleted with ID: ${postId}`);
     return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: Error | any) {
     console.error("Error deleting post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }

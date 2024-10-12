@@ -7,7 +7,7 @@ import { NextAuthOptions } from "next-auth";
 import { CustomSession } from "./[id]/influence/route";
 
 
-export async function GET(request: Request) {
+export async function GET() {
   const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   // Handle creating a new post
-  const session = await getServerSession(authOptions as any);
+  const session = await getServerSession(authOptions as NextAuthOptions);
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
