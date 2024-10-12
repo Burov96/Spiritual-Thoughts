@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Loading from "./components/Loading";
+import {Loading} from "./components/Loading";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -20,7 +20,7 @@ export default function HomePage() {
       {session ? (
         <>
           <p className="text-lg mb-8 text-center max-w-md">
-            Hello, {session.user.name}! Ready to share your spiritual thoughts?
+            Hello, {session.user?.name}! Ready to share your spiritual thoughts?
           </p>
           <Link
             href="/feed"
