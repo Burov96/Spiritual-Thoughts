@@ -19,4 +19,4 @@ const Loading = ({ width = 700, height = 700 }: LoadingProps) => {
   );
 };
 
-export default Loading;
+export {Loading};
