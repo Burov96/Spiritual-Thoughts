@@ -1,4 +1,5 @@
-// pages/api/users/[id].js
+"use client"
+
 import prisma from "../../../../prisma"
 
 export default async function handler(req, res) {

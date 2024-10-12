@@ -1,4 +1,5 @@
-// Define a CustomSession interface
+"use client"
+
 interface CustomSession {
   user: {
     id: string;
@@ -8,7 +9,6 @@ interface CustomSession {
   };
 }
 
-// Example usage in your API route
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../lib/prisma";
 import { NextAuthOptions } from "next-auth";

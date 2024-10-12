@@ -1,4 +1,3 @@
-// components/RegisterForm.jsx
 "use client"
 import { useState } from "react"
 

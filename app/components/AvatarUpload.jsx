@@ -1,4 +1,3 @@
-// components/AvatarUpload.jsx
 "use client"
 import { useState } from "react"
 

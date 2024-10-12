@@ -1,4 +1,3 @@
-// app/protected/page.jsx
 "use client"
 import { useSession } from "next-auth/react"
 

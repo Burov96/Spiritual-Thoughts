@@ -1,3 +1,5 @@
+"use client"
+
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../lib/prisma";
 import { NextResponse } from "next/server";

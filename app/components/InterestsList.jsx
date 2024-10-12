@@ -1,3 +1,5 @@
+"use client";
+
 export default function InterestsList({ interests }) {
     return (
       <ul className="flex flex-wrap gap-2">

@@ -1,4 +1,3 @@
-// components/FollowButton.jsx
 "use client"
 import { useSession } from "next-auth/react"
 import { useState } from "react"

@@ -1,4 +1,3 @@
-// app/components/Footer.jsx
 "use client";
 
 export default function Footer() {

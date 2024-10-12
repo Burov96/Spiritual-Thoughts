@@ -1,4 +1,5 @@
-// pages/api/auth/register.js
+"use client"
+
 import prisma from "../../../lib/prisma"
 import bcrypt from "bcrypt"
 

@@ -1,5 +1,3 @@
-// File: usePosts.ts
-
 "use client";
 
 import { useState, useTransition, useEffect } from 'react';

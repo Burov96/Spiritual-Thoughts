@@ -28,8 +28,6 @@ else{
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",

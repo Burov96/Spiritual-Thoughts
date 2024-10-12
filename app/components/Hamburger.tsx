@@ -1,4 +1,5 @@
-// app/components/Hamburger.tsx
+"use client";
+
 import { DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
 import React, { useEffect, useRef } from 'react';
 

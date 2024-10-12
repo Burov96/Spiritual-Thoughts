@@ -1,4 +1,4 @@
-// pages/api/users/[id]/unfollow.js
+"use client"
 import { getSession } from "next-auth/react"
 import prisma from "../../../../../prisma"
 

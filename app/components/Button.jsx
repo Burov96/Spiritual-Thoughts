@@ -1,3 +1,5 @@
+"use client"
+
 export default function Button({ children, onClick, className }) {
     return (
       <button

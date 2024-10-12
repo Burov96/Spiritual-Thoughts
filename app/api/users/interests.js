@@ -1,4 +1,5 @@
-// pages/api/users/interests.js
+"use client"
+
 import { getSession } from "next-auth/react"
 import prisma from "../../../../prisma"
 
