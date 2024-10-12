@@ -5,19 +5,20 @@ import { useSession } from "next-auth/react";
 import { Post } from "../components/Post";
 import { PostForm } from "../components/PostForm";
 import { useNotification } from "../NotificationProvider"; // Correct import
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Loading } from "../components/Loading";
 
 export default function Feed() {
   const { showNotification } = useNotification(); // Use the hook directly
+  const pathname = usePathname();
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "unauthenticated" && router.pathname !== "/") {
+    if (status === "unauthenticated" && pathname !== "/") {
       showNotification("First login to see the feed", "failure");
-      router.push("/login");
+      router.push("/auth/signin");
     } else if (status === "authenticated") {
       fetch("/api/posts")
         .then((res) => res.json())
@@ -26,7 +27,7 @@ export default function Feed() {
           showNotification("Failed to load posts", "failure");
         });
     }
-  }, [status, router.pathname, showNotification]);
+  }, [status, pathname, showNotification]);
 
   if (status === "loading") {
     return <Loading />;

@@ -6,7 +6,7 @@ interface LoadingProps {
   height?: number;
 }
 
-const Loading: React.FC<LoadingProps> = ({ width = 700, height = 700 }) => {
+export const Loading: React.FC<LoadingProps> = ({ width = 700, height = 700 }) => {
   return (
     <div className=" flex justify-center align-middle loading-container">
       <DotLottiePlayer
