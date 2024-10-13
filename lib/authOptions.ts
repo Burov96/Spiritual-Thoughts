@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions, User, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import prisma from "./prisma";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
 interface ExtendedUser extends User {
   id: string;
@@ -17,6 +18,7 @@ interface ExtendedSession extends Session {
 }
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "Credentials",

@@ -1,7 +1,15 @@
 import { execSync } from 'child_process';
 
-// Run Prisma generate and migrate
-execSync('npx prisma generate && npx prisma migrate deploy');
-
-// Run the actual build command
-execSync('next build', { stdio: 'inherit' });
+try {
+  console.log('Running Prisma generate...');
+  execSync('npx prisma generate', { stdio: 'inherit' });
+  
+  console.log('Running Prisma migrate deploy...');
+  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  
+  console.log('Running Next.js build...');
+  execSync('next build', { stdio: 'inherit' });
+} catch (error) {
+  console.error('Build script failed:', error);
+  process.exit(1);
+}
