@@ -1,9 +1,22 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions, User, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import prisma from "./prisma";
 
-export const authOptions = {
+interface ExtendedUser extends User {
+  id: string;
+}
+
+interface ExtendedSession extends Session {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  }
+}
+
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -35,7 +48,7 @@ export const authOptions = {
           email: user.email,
           name: user.name,
         };
-      }      
+      }
     })
   ],
   callbacks: {
@@ -45,11 +58,11 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }): Promise<ExtendedSession> {
       if (session.user) {
-        session.user.id = token.id;
+        (session.user as ExtendedUser).id = token.id as string;
       }
-      return session;
+      return session as ExtendedSession;
     }
   },
   pages: {
