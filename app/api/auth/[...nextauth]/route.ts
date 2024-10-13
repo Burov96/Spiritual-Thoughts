@@ -1,4 +1,3 @@
-"use client"
 
 import NextAuth from "next-auth";
 import { authOptions } from "../../../../lib/authOptions"; // Adjust the path as necessary

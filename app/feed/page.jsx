@@ -14,7 +14,6 @@ export default function Feed() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
-  console.log(session)
 
   useEffect(() => {
     if (status === "unauthenticated" && pathname !== "/") {
@@ -25,7 +24,7 @@ export default function Feed() {
         .then((res) => res.json())
         .then((data) => setPosts(data))
         .catch(() => {
-          showNotification("Failed to load posts", "failure");
+          console.log("Failed to load posts", "failure");
         });
     }
   }, [status, pathname, showNotification]);
@@ -46,7 +45,6 @@ export default function Feed() {
   );
 }
 
-// Helper function to fetch posts
 const fetchPosts = async (setPosts, showNotification) => {
   try {
     const res = await fetch("/api/posts");

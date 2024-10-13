@@ -19,10 +19,10 @@ const Thrash: React.FC = () => {
 
 
   return (
-    <div className="w-10 h-10">
+    <div className="w-9 h-9">
       <DotLottiePlayer
         ref={playerRef}
-        src={"images/thrash.lottie"}
+        src={"/images/thrash.lottie"}
         autoplay={false}
         loop={false}
         onMouseEnter={handleMouseEnter}

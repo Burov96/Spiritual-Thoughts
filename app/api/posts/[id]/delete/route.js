@@ -1,20 +1,17 @@
 
-
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../../../../lib/authOptions";
 
-export async function POST(request) {
+export async function POST(request, { params }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     console.log("Unauthorized access to delete route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // Extract post ID from the request URL
-  const url = new URL(request.url);
-  const postId = Number(url.pathname.split('/').pop());
+  const postId = Number(params.id);
 
   try {
     const post = await prisma.post.findUnique({
@@ -24,6 +21,12 @@ export async function POST(request) {
 
     if (!post) {
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
+    }
+
+    // Check if the user is the owner of the post
+    if (post.authorId !== session.user.id) {
+      console.log(post);
+      return NextResponse.json({ message: "Unauthorized to delete this post" }, { status: 403 });
     }
 
     await prisma.influence.deleteMany({

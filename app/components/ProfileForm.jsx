@@ -72,7 +72,7 @@ export function ProfileForm({ user }) {
 
       <div className="mb-6 flex justify-center">
         <Image
-          src={profilePicture}
+          src={profilePicture || "/images/user.png"}
           alt={`${name}'s Profile Picture`}
           width={200}
           height={200}

@@ -12,23 +12,25 @@ export default function SignIn() {
   const router = useRouter();
   
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault();
-    const res = await signIn("credentials", {
-      // callbackUrl: "/feed",
-      username: email,
-      password: password,
-      redirect: false,
-    });
-    if (res.ok) {
-      console.log('res is ok my nigga')
-      console.log(res)
-      showNotification("Welcome back, "+email, "success")
-      router.push("/feed");
-    } else {
-      showNotification("Failed to sign in", "failure");
+    try {
+      const res = await signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false,
+      });
+      if (res?.error) {
+        showNotification(res.error, "failure");
+      } else if (res?.ok) {
+        showNotification("Welcome back, " + email, "success");
+        router.push("/feed");
+      }
+    } catch (error) {
+      console.error("Sign in error:", error);
+      showNotification("An unexpected error occurred", "failure");
     }
   };
+  
   
   
   return (

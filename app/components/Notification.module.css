@@ -71,7 +71,24 @@
   margin: 0 0.5rem;
   color: #333;
   font-size: 0.9rem;
+  white-space: nowrap;
+  /* overflow: hidden; */
+  text-wrap: balance;
+  
+  /* Text fitting */
+  display: inline-block;
+  max-width: 100%;
+  transform-origin: left;
+  transform: scale(1);
 }
+
+@supports (width: fit-content) {
+  .message {
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+
 
 .closeButton {
   background: none;

@@ -1,20 +1,18 @@
-
+// app/api/posts/[postId]/influence/route.js
 
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../../../../lib/authOptions";
 
-export async function POST(request) {
+export async function POST(request, { params }) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    console.log("Unauthorized access to like route");
+    console.log("Unauthorized access to influence route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // Extract post ID from the request URL
-  const url = new URL(request.url);
-  const postId = Number(url.pathname.split('/').pop());
+  const postId = Number(params.id);
 
   try {
     const post = await prisma.post.findUnique({
@@ -28,7 +26,7 @@ export async function POST(request) {
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId: postId,
-        userId: session?.user.id,
+        userId: session.user.id*1,
         type: "like",
       },
     });

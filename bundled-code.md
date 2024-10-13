@@ -185,12 +185,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     (message: string, type: NotificationType, persistent: boolean = false) => {
       const id = findSmallestMissingId(state.notifications.map((n) => n.id));
       const finalId = id <= state.nextId ? id : state.nextId;
-
+  
+      // Include 'id' in the payload
       dispatch({
         type: "ADD_NOTIFICATION",
-        payload: { message, type, persistent },
+        payload: { id: finalId, message, type, persistent },
       });
-
+  
       if (!persistent) {
         const timer = setTimeout(() => {
           if (!hoveredNotifications.current.has(finalId)) {
@@ -198,12 +199,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
             timers.current.delete(finalId);
           }
         }, 3000);
-
+  
         timers.current.set(finalId, timer);
       }
     },
     [state.notifications, state.nextId]
   );
+  
 
   const removeNotification = useCallback((id: number) => {
     dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
@@ -304,6 +306,8 @@ export default MyApp;
 
 ## File: app/hooks/useNotification.js
 ```js
+;
+
 import { useContext } from "react";
 import { NotificationContext } from "../NotificationProvider";
 
@@ -319,8 +323,6 @@ export const useNotification = () => {
 
 ## File: app/hooks/usePosts.ts
 ```ts
-// File: usePosts.ts
-
 "use client";
 
 import { useState, useTransition, useEffect } from 'react';
@@ -455,7 +457,6 @@ export default function Profile(){
 
 ## File: app/profile/[id]/page.jsx
 ```jsx
-// app/profile/[id]/page.jsx
 "use client"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
@@ -500,7 +501,6 @@ export default function Profile() {
 
 ## File: app/protected/page.jsx
 ```jsx
-// app/protected/page.jsx
 "use client"
 import { useSession } from "next-auth/react"
 
@@ -717,6 +717,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ## File: app/api/users/route.js
 ```js
+
 import { getServerSession } from "next-auth";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/authOptions";
@@ -736,7 +737,8 @@ export async function GET() {
 
 ## File: app/api/users/[id].js
 ```js
-// pages/api/users/[id].js
+
+
 import prisma from "../../../../prisma"
 
 export default async function handler(req, res) {
@@ -767,7 +769,8 @@ export default async function handler(req, res) {
 
 ## File: app/api/users/interests.js
 ```js
-// pages/api/users/interests.js
+
+
 import { getSession } from "next-auth/react"
 import prisma from "../../../../prisma"
 
@@ -794,7 +797,8 @@ export default async function handler(req, res) {
 
 ## File: app/api/users/[id]/follow.js
 ```js
-// pages/api/users/[id]/follow.js
+
+
 import { getSession } from "next-auth/react"
 import prisma from "../../../../../prisma"
 
@@ -826,7 +830,7 @@ export default async function handler(req, res) {
 
 ## File: app/api/users/[id]/unfollow.js
 ```js
-// pages/api/users/[id]/unfollow.js
+
 import { getSession } from "next-auth/react"
 import prisma from "../../../../../prisma"
 
@@ -858,6 +862,7 @@ export default async function handler(req, res) {
 
 ## File: app/api/profile/route.js
 ```js
+
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../lib/prisma";
 import { NextResponse } from "next/server";
@@ -940,7 +945,7 @@ export async function PUT(request) {
 
 ## File: app/api/upload-avatar/route.js
 ```js
-// app/api/upload-avatar/route.js
+
 import { getServerSession } from "next-auth";
 import prisma from "../../../lib/prisma";
 import { authOptions } from "../../../lib/authOptions";
@@ -965,17 +970,24 @@ export async function POST(request) {
 
 ## File: app/api/posts/route.ts
 ```ts
-// app/api/posts/route.ts
+"use client"
+
+interface CustomSession {
+  user: {
+    id: string;
+    name?: string | null;
+    email: string;
+    image?: string | null;
+  };
+}
 
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../lib/prisma";
 import { NextAuthOptions } from "next-auth";
-import { CustomSession } from "./[id]/influence/route";
 import { authOptions } from "../../../lib/authOptions";
 
-
 export async function GET() {
-  const session = await getServerSession(authOptions as NextAuthOptions);
+  const session = await getServerSession(authOptions as NextAuthOptions) as CustomSession;
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -1001,9 +1013,9 @@ export async function GET() {
     return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }
+
 export async function POST(request: Request) {
-  // Handle creating a new post
-  const session = await getServerSession(authOptions as NextAuthOptions);
+  const session = await getServerSession(authOptions as NextAuthOptions) as CustomSession;
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -1018,7 +1030,7 @@ export async function POST(request: Request) {
     const post = await prisma.post.create({
       data: {
         content,
-        author: { connect: { email: (session as CustomSession).user.email } },
+        author: { connect: { email: session.user.email } },
       },
     });
 
@@ -1031,36 +1043,27 @@ export async function POST(request: Request) {
 
 ```
 
-## File: app/api/posts/[id]/influence/route.ts
-```ts
+## File: app/api/posts/[id]/influence/route.js
+```js
+
+
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
-import { NextAuthOptions } from "next-auth";
-import { Session } from "next-auth";
 import { authOptions } from "../../../../../lib/authOptions";
 
-export interface CustomSession extends Session {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-
-
-  const session = await getServerSession(authOptions as NextAuthOptions);
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
   if (!session) {
     console.log("Unauthorized access to like route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const postId = Number(params.id);
+  // Extract post ID from the request URL
+  const url = new URL(request.url);
+  const postId = Number(url.pathname.split('/').pop());
 
   try {
-    // Check if the post exists
     const post = await prisma.post.findUnique({
       where: { id: postId },
     });
@@ -1069,35 +1072,32 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
 
-    // Toggle like: if already liked, remove; else, add
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId: postId,
-        userId: (session as CustomSession).user.id,
-        type: "like", // Assuming 'type' distinguishes like, dislike, etc.
+        userId: session?.user.id,
+        type: "like",
       },
     });
 
     if (existingInfluence) {
-      // Unlike the post
       await prisma.influence.delete({
         where: { id: existingInfluence.id },
       });
       console.log(`Post unliked with ID: ${postId}`);
       return NextResponse.json({ message: "Post unliked" }, { status: 200 });
     } else {
-      // Like the post
       await prisma.influence.create({
         data: {
           type: "like",
           postId: postId,
-          userId: (session as CustomSession).user.id,
+          userId: session.user.id,
         },
       });
       console.log(`Post liked with ID: ${postId}`);
       return NextResponse.json({ message: "Post liked" }, { status: 201 });
     }
-  } catch (error: Error | any) {
+  } catch (error) {
     console.error("Error liking/unliking post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
@@ -1107,6 +1107,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
 ## File: app/api/posts/[id]/like.js
 ```js
+
+
 // pages/api/posts/[id]/like.js
 import { getSession } from "next-auth/react"
 import prisma from "../../../../../prisma"
@@ -1137,7 +1139,7 @@ export default async function handler(req, res) {
 
 ## File: app/api/posts/[id]/index.js
 ```js
-// pages/api/posts/index.js
+
 import prisma from "../../../../prisma"
 
 export default async function handler(req, res) {
@@ -1161,6 +1163,8 @@ export default async function handler(req, res) {
 
 ## File: app/api/posts/[id]/pray.js
 ```js
+
+
 // pages/api/posts/[id]/pray.js
 import { getSession } from "next-auth/react"
 import prisma from "../../../../../prisma"
@@ -1189,25 +1193,27 @@ export default async function handler(req, res) {
 
 ```
 
-## File: app/api/posts/[id]/delete/route.ts
-```ts
+## File: app/api/posts/[id]/delete/route.js
+```js
+
+
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
-import { NextAuthOptions } from "next-auth";
 import { authOptions } from "../../../../../lib/authOptions";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions as NextAuthOptions);
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
   if (!session) {
     console.log("Unauthorized access to delete route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const postId = Number(params.id);
+  // Extract post ID from the request URL
+  const url = new URL(request.url);
+  const postId = Number(url.pathname.split('/').pop());
 
   try {
-    // Check if the post exists and belongs to the user
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: { influences: true },
@@ -1217,23 +1223,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ message: "Post not found" }, { status: 404 });
     }
 
-    // if (post.authorId != session.user?.id) {
-    //   return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    // }
-
-    // Delete related influences
     await prisma.influence.deleteMany({
       where: { postId: postId },
     });
 
-    // Delete the post
     await prisma.post.delete({
       where: { id: postId },
     });
 
     console.log(`Post deleted with ID: ${postId}`);
     return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
-  } catch (error: Error | any) {
+  } catch (error) {
     console.error("Error deleting post:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
@@ -1243,13 +1243,27 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
 ## File: app/api/posts/[id]/influence.ts
 ```ts
+"use client"
+
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/authOptions";
 
+// Define a custom session type
+interface CustomSession {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  };
+}
+
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  // Assert that the session is of type CustomSession
+  const session = (await getServerSession(authOptions)) as CustomSession;
+
+  if (!session || !session.user.id) {
     console.log("Unauthorized access to influence route");
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
@@ -1300,6 +1314,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
 ## File: app/api/auth/[...nextauth]/route.ts
 ```ts
+"use client"
+
 import NextAuth from "next-auth";
 import { authOptions } from "../../../../lib/authOptions"; // Adjust the path as necessary
 
@@ -1311,7 +1327,7 @@ export { handler as GET, handler as POST };
 
 ## File: app/api/auth/register/route.js
 ```js
-// app/api/auth/register/route.js
+
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '../../../../lib/prisma';
@@ -1336,7 +1352,8 @@ export async function POST(request) {
 
 ## File: app/auth/register.js
 ```js
-// pages/api/auth/register.js
+
+
 import prisma from "../../../lib/prisma"
 import bcrypt from "bcrypt"
 
@@ -1465,8 +1482,6 @@ else{
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -1685,8 +1700,6 @@ export function useOutsideClick(ref, callback, exception, exception2) {
 
 ## File: app/components/Post.tsx
 ```tsx
-// app/components/Post.tsx
-
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -2079,7 +2092,6 @@ export default function NavBar() {
 
 ## File: app/components/AvatarUpload.jsx
 ```jsx
-// components/AvatarUpload.jsx
 "use client"
 import { useState } from "react"
 
@@ -2112,6 +2124,8 @@ export default function AvatarUpload() {
 
 ## File: app/components/InterestsList.jsx
 ```jsx
+"use client";
+
 export default function InterestsList({ interests }) {
     return (
       <ul className="flex flex-wrap gap-2">
@@ -2128,6 +2142,8 @@ export default function InterestsList({ interests }) {
 
 ## File: app/components/Loading.tsx
 ```tsx
+"use client";
+
 import React from 'react';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
@@ -2155,7 +2171,6 @@ export {Loading};
 
 ## File: app/components/Footer.jsx
 ```jsx
-// app/components/Footer.jsx
 "use client";
 
 export default function Footer() {
@@ -2170,6 +2185,8 @@ export default function Footer() {
 
 ## File: app/components/Thrash.tsx
 ```tsx
+"use client"
+
 import {
   DotLottieCommonPlayer,
   DotLottiePlayer,
@@ -2207,9 +2224,8 @@ export default Thrash;
 
 ## File: app/components/Avatars.jsx
 ```jsx
-// app/components/Avatars.jsx
+
 import Image from "next/image";
-import React from "react";
 
 const Avatars = () => {
   return (
@@ -2335,7 +2351,6 @@ export function ProfileForm({ user }) {
 
 ## File: app/components/FollowButton.jsx
 ```jsx
-// components/FollowButton.jsx
 "use client"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
@@ -2372,18 +2387,25 @@ export default function FollowButton({ userId }) {
 
 ## File: app/components/SessionProviderWrapper.tsx
 ```tsx
-"use client";
+"use client"
 
+import { ReactNode } from "react";
 import { SessionProvider } from "next-auth/react";
 
-export default function SessionProviderWrapper({ children }) {
+interface SessionProviderWrapperProps {
+  children: ReactNode;
+}
+
+export default function SessionProviderWrapper({ children }: SessionProviderWrapperProps) {
   return <SessionProvider>{children}</SessionProvider>;
 }
+
 ```
 
 ## File: app/components/Hamburger.tsx
 ```tsx
-// app/components/Hamburger.tsx
+"use client";
+
 import { DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
 import React, { useEffect, useRef } from 'react';
 
@@ -2420,6 +2442,8 @@ export default Hamburger;
 
 ## File: app/components/Like.tsx
 ```tsx
+"use client";
+
 import { DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
 import React, { useEffect, useRef } from 'react';
 
@@ -2470,7 +2494,6 @@ export default Like;
 
 ## File: app/components/RegisterForm.jsx
 ```jsx
-// components/RegisterForm.jsx
 "use client"
 import { useState } from "react"
 
@@ -2532,6 +2555,8 @@ export default function RegisterForm() {
 
 ## File: app/components/Button.jsx
 ```jsx
+"use client"
+
 export default function Button({ children, onClick, className }) {
     return (
       <button
@@ -2603,7 +2628,6 @@ export function PostForm() {
 
 ## File: app/components/Interests.jsx
 ```jsx
-// components/Interests.jsx
 "use client"
 import { useState } from "react"
 
@@ -2766,6 +2790,7 @@ export const authOptions: NextAuthOptions = {
 
         if (user && (await compare(credentials.password, user.password))) {
           const { password: _password, ...userWithoutPassword } = user; // Prefix with _
+          console.log(_password.substring(0,2))
           return userWithoutPassword;
         }
         return null;

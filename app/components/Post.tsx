@@ -137,7 +137,7 @@ const isAuthor = session?.user?.email === post.author.email;
         {post.influences.map((influence) => (
           <div key={influence.id} className="flex items-center space-x-2">
             <Image
-              src={influence.user.profilePicture}
+              src={influence.user.profilePicture || "/images/user.png"}
               alt={influence.user.name.substring(0,3) + ".."}
               width={24}
               height={24}
