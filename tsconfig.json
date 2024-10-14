@@ -22,14 +22,18 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "noImplicitAny": false,
+    "ignoreDeprecations": "5.0",
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "app/api/posts/[id]/delete/route copy.js"  ],
+    ".next/types/**/*.ts",
+    "app/api/posts/[id]/delete/route copy.js",
+    "app/components/UserOP.jsx"
+  ],
   "exclude": [
     "node_modules"
   ]

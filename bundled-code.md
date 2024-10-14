@@ -18,7 +18,7 @@ export default function Feed() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
-  console.log(session)
+  console.log(session);
 
   useEffect(() => {
     if (status === "unauthenticated" && pathname !== "/") {
@@ -29,7 +29,7 @@ export default function Feed() {
         .then((res) => res.json())
         .then((data) => setPosts(data))
         .catch(() => {
-          showNotification("Failed to load posts", "failure");
+          console.log("Failed to load posts", "failure");
         });
     }
   }, [status, pathname, showNotification]);
@@ -50,7 +50,6 @@ export default function Feed() {
   );
 }
 
-// Helper function to fetch posts
 const fetchPosts = async (setPosts, showNotification) => {
   try {
     const res = await fetch("/api/posts");
@@ -524,25 +523,42 @@ export default function ProtectedPage() {
 ```tsx
 "use client";
 
-import React, { createContext, useReducer, useMemo, useCallback, useState, useRef, useEffect } from "react";
+import React, {
+  createContext,
+  useReducer,
+  useMemo,
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import { Notification } from "./components/Notification";
-import {  NotificationType, State, Action, NotificationItem } from "./notificationTypes";
+import {
+  NotificationType,
+  State,
+  Action,
+  NotificationItem,
+} from "./notificationTypes";
 
-// Create the Notification Context
-export const NotificationContext = createContext<{
-  showNotification: (message: string, type: NotificationType, persistent?: boolean) => void;
-  removeNotification: (id: number) => void;
-  notifications: NotificationItem[];
-} | undefined>(undefined);
+export const NotificationContext = createContext<
+  | {
+      showNotification: (
+        message: string,
+        type: NotificationType,
+        persistent?: boolean
+      ) => void;
+      removeNotification: (id: number) => void;
+      notifications: NotificationItem[];
+    }
+  | undefined
+>(undefined);
 
-// Initial state for the reducer
 const initialState: State = {
   availableIds: [],
   notifications: [],
   nextId: 1,
 };
 
-// Reducer function to handle state transitions
 const notificationReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_NOTIFICATION":
@@ -563,7 +579,6 @@ const notificationReducer = (state: State, action: Action): State => {
   }
 };
 
-// Helper function to find the smallest missing ID
 const findSmallestMissingId = (ids: number[]): number => {
   const sortedIds = [...ids].sort((a, b) => a - b);
   let smallestMissingId = 1;
@@ -577,46 +592,70 @@ const findSmallestMissingId = (ids: number[]): number => {
   return smallestMissingId;
 };
 
-// NotificationProvider Component
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(notificationReducer, initialState);
-  const [hoveredNotifications, setHoveredNotifications] = useState<Set<number>>(new Set());
+  const [hoveredNotifications, setHoveredNotifications] = useState<Set<number>>(
+    new Set()
+  );
   const timers = useRef<Map<number, NodeJS.Timeout>>(new Map());
+  const recentMessages = useRef<Map<string, number>>(new Map());
 
-  const handleNotificationHover = useCallback((id: number, isHovered: boolean) => {
-    setHoveredNotifications(prev => {
-      const newSet = new Set(prev);
-      if (isHovered) {
-        newSet.add(id);
-      } else {
-        newSet.delete(id);
-      }
-      return newSet;
-    });
-  }, []);
-
-  // Function to show a new notification
-  const showNotification = useCallback((message: string, type: NotificationType, persistent = false) => {
-    const currentIds = state.notifications.map((n) => n.id);
-    const id = findSmallestMissingId(currentIds);
-
-    dispatch({
-      type: "ADD_NOTIFICATION",
-      payload: { id, message, type, persistent },
-    });
-
-    // Set timer to remove the notification after 3 seconds
-    if (!persistent) {
-      const timer = setTimeout(() => {
-        if (!hoveredNotifications.has(id)) {
-          dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
-          timers.current.delete(id);
+  const handleNotificationHover = useCallback(
+    (id: number, isHovered: boolean) => {
+      setHoveredNotifications((prev) => {
+        const newSet = new Set(prev);
+        if (isHovered) {
+          newSet.add(id);
+        } else {
+          newSet.delete(id);
         }
-      }, 3000);
+        return newSet;
+      });
+    },
+    []
+  );
 
-      timers.current.set(id, timer);
-    }
-  }, [state.notifications, hoveredNotifications]);
+  const showNotification = useCallback(
+    (message: string, type: NotificationType, persistent = false) => {
+      const currentTime = Date.now();
+      const recentMessageTime = recentMessages.current.get(message);
+
+      if (recentMessageTime && currentTime - recentMessageTime < 3000) {
+        return;
+      }
+
+      const currentIds = state.notifications.map((n) => n.id);
+      const id = findSmallestMissingId(currentIds);
+      dispatch({
+        type: "ADD_NOTIFICATION",
+        payload: { id, message, type, persistent },
+      });
+
+      recentMessages.current.set(message, currentTime);
+
+      if (!persistent) {
+        const timer = setTimeout(() => {
+          if (!hoveredNotifications.has(id)) {
+            dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
+            timers.current.delete(id);
+          }
+        }, 3000);
+
+        timers.current.set(id, timer);
+      }
+      const cleanupTime = currentTime - 3000;
+      for (const [key, time] of Object.entries(Object.fromEntries(recentMessages.current))) {
+        if (time < cleanupTime) {
+          recentMessages.current.delete(key);
+        }
+      }
+      
+
+    },
+    [state.notifications, hoveredNotifications]
+  );
 
   const removeNotification = useCallback((id: number) => {
     dispatch({ type: "REMOVE_NOTIFICATION", payload: id });
@@ -625,29 +664,31 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       clearTimeout(timer);
       timers.current.delete(id);
     }
-    setHoveredNotifications(prev => {
+    setHoveredNotifications((prev) => {
       const newSet = new Set(prev);
       newSet.delete(id);
       return newSet;
     });
   }, []);
 
-  // Clear all timers on unmount
   useEffect(() => {
     const currentTimers = Array.from(timers.current.values());
     return () => {
       currentTimers.forEach(clearTimeout);
     };
   }, []);
-  // Memoize the context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
-    showNotification,
-    removeNotification,
-    notifications: state.notifications,
-  }), [showNotification, removeNotification, state.notifications]);
-  
+
+  const contextValue = useMemo(
+    () => ({
+      showNotification,
+      removeNotification,
+      notifications: state.notifications,
+    }),
+    [showNotification, removeNotification, state.notifications]
+  );
+
   return (
-    <NotificationContext.Provider value ={contextValue}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
       {state.notifications.map((notification) => (
         <Notification
@@ -660,11 +701,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     </NotificationContext.Provider>
   );
 };
-// Custom hook to use the notification context
+
 export const useNotification = () => {
   const context = React.useContext(NotificationContext);
   if (context === undefined) {
-    throw new Error('useNotification must be used within a NotificationProvider');
+    throw new Error(
+      "useNotification must be used within a NotificationProvider"
+    );
   }
   return context;
 };
@@ -735,127 +778,215 @@ export async function GET() {
 
 ```
 
-## File: app/api/users/[id].js
+## File: app/api/users/interests/route.js
+```js
+import { getServerSession } from "next-auth/next";
+import prisma from "../../../../lib/prisma";
+import { authOptions } from "../../../../lib/authOptions";
+
+export async function POST(request) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session) {
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
+  }
+
+  const { interests } = await request.json();
+
+  await prisma.user.update({
+    where: { email: session.user.email },
+    data: { interests },
+  });
+
+  return new Response(JSON.stringify({ message: "Interests updated" }), { status: 200 });
+}
+```
+
+## File: app/api/users/[id]/influence/route.js
 ```js
 
+import { getServerSession } from "next-auth/next";
+import prisma from "../../../../../lib/prisma";
+import { authOptions } from "../../../../../lib/authOptions";
 
-import prisma from "../../../../prisma"
+export async function POST(request, { params }) {
+  const { id } = params; // Post ID
+  const session = await getServerSession(authOptions);
 
-export default async function handler(req, res) {
-  const { id } = req.query
+  if (!session) {
+    console.log("Unauthorized access to influence route");
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
+  }
 
-  if (req.method === "GET") {
-    const user = await prisma.user.findUnique({
-      where: { id: parseInt(id) },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        avatar: true,
-        interests: true,
+  const { type } = await request.json();
+  const postId = Number(id);
+
+  if (!type || typeof type !== 'string') {
+    console.log("Invalid influence type");
+    return new Response(JSON.stringify({ message: "Invalid influence type" }), { status: 400 });
+  }
+
+  try {
+    const existingInfluence = await prisma.influence.findFirst({
+      where: {
+        postId,
+        userId: parseInt(session.user.id),
       },
-    })
-    if (!user) {
-      return res.status(404).json({ message: "User not found" })
+    });
+
+    if (existingInfluence) {
+      await prisma.influence.delete({
+        where: {
+          id: existingInfluence.id,
+        },
+      });
+      console.log(`Influence removed for postId: ${postId}, userId: ${session.user.id}`);
+      return new Response(JSON.stringify({ message: "Influence removed" }), { status: 200 });
+    } else {
+      await prisma.influence.create({
+        data: {
+          type,
+          postId,
+          userId: parseInt(session.user.id),
+        },
+      });
+      console.log(`Influence added for postId: ${postId}, userId: ${session.user.id}`);
+      return new Response(JSON.stringify({ message: "Influence added" }), { status: 201 });
     }
-    return res.status(200).json(user)
+  } catch (error) {
+    console.error("Error adding/removing influence:", error);
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
-
-  res.setHeader("Allow", ["GET"])
-  res.status(405).end(`Method ${req.method} Not Allowed`)
 }
 
 ```
 
-## File: app/api/users/interests.js
+## File: app/api/users/[id]/route.js
 ```js
+import prisma from "../../../../lib/prisma";
 
+export async function GET(request, { params }) {
+  const { id } = params;
+console.log('PROBLEMA E V API USERSSSSS')
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      avatar: true,
+      interests: true,
+    },
+  });
 
-import { getSession } from "next-auth/react"
-import prisma from "../../../../prisma"
-
-export default async function handler(req, res) {
-  const session = await getSession({ req })
-  if (!session) {
-    return res.status(401).json({ message: "Unauthorized" })
+  if (!user) {
+    return new Response(JSON.stringify({ message: "User not found" }), { status: 404 });
   }
-
-  if (req.method === "POST") {
-    const { interests } = req.body
-    await prisma.user.update({
-      where: { email: session.user.email },
-      data: { interests },
-    })
-    return res.status(200).json({ message: "Interests updated" })
-  }
-
-  res.setHeader("Allow", ["POST"])
-  res.status(405).end(`Method ${req.method} Not Allowed`)
+  
+  return new Response(JSON.stringify(user), { status: 200 });
 }
-
 ```
 
-## File: app/api/users/[id]/follow.js
+## File: app/api/users/[id]/follow/route.js
 ```js
 
+import { getServerSession } from "next-auth/next";
+import prisma from "../../../../../lib/prisma";
+import { authOptions } from "../../../../../lib/authOptions";
 
-import { getSession } from "next-auth/react"
-import prisma from "../../../../../prisma"
-
-export default async function handler(req, res) {
-  const { id } = req.query
-  const session = await getSession({ req })
+export async function POST(request, { params }) {
+  const { id } = params; // ID of the user to follow
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    return res.status(401).json({ message: "Unauthorized" })
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
 
-  if (req.method === "POST") {
-    await prisma.user.update({
-      where: { email: session.user.email },
-      data: {
-        following: {
-          connect: { id: parseInt(id) },
-        },
+  await prisma.user.update({
+    where: { email: session.user.email },
+    data: {
+      following: {
+        connect: { id: parseInt(id) },
       },
-    })
-    return res.status(200).json({ message: "Followed" })
-  }
+    },
+  });
 
-  res.setHeader("Allow", ["POST"])
-  res.status(405).end(`Method ${req.method} Not Allowed`)
+  return new Response(JSON.stringify({ message: "Followed" }), { status: 200 });
 }
 
 ```
 
-## File: app/api/users/[id]/unfollow.js
+## File: app/api/users/[id]/unfollow/route.js
 ```js
 
-import { getSession } from "next-auth/react"
-import prisma from "../../../../../prisma"
+import { getServerSession } from "next-auth/next";
+import prisma from "../../../../../lib/prisma";
+import { authOptions } from "../../../../../lib/authOptions";
 
-export default async function handler(req, res) {
-  const { id } = req.query
-  const session = await getSession({ req })
+export async function POST(request, { params }) {
+  const { id } = params; // ID of the user to unfollow
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    return res.status(401).json({ message: "Unauthorized" })
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
 
-  if (req.method === "POST") {
-    await prisma.user.update({
-      where: { email: session.user.email },
-      data: {
-        following: {
-          disconnect: { id: parseInt(id) },
-        },
+  await prisma.user.update({
+    where: { email: session.user.email },
+    data: {
+      following: {
+        disconnect: { id: parseInt(id) },
       },
-    })
-    return res.status(200).json({ message: "Unfollowed" })
+    },
+  });
+
+  return new Response(JSON.stringify({ message: "Unfollowed" }), { status: 200 });
+}
+
+```
+
+## File: app/api/users/[id]/like/route.js
+```js
+// app/api/posts/[id]/like/route.js
+
+import { getServerSession } from "next-auth/next";
+import prisma from "../../../../../lib/prisma";
+import { authOptions } from "../../../../../lib/authOptions";
+
+export async function POST(request, { params }) {
+  const { id } = params; // Post ID
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
 
-  res.setHeader("Allow", ["POST"])
-  res.status(405).end(`Method ${req.method} Not Allowed`)
+  try {
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        postId: parseInt(id),
+        userId: parseInt(session.user.id),
+      },
+    });
+
+    if (existingLike) {
+      await prisma.like.delete({
+        where: { id: existingLike.id },
+      });
+      return new Response(JSON.stringify({ message: "Post unliked" }), { status: 200 });
+    } else {
+      await prisma.like.create({
+        data: {
+          user: { connect: { email: session.user.email } },
+          post: { connect: { id: parseInt(id) } },
+        },
+      });
+      return new Response(JSON.stringify({ message: "Post liked" }), { status: 201 });
+    }
+  } catch (error) {
+    console.error("Error liking/unliking post:", error);
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
+  }
 }
 
 ```
@@ -881,7 +1012,9 @@ export async function GET() {
   }
 
   try {
+    console.log('PROBLEMA E V API PROFILEEEEEEEE')
     const user = await prisma.user.findUnique({
+
       where: { email: session.user.email },
       select: { id: true, name: true, email: true, profilePicture: true },
     });
@@ -912,6 +1045,7 @@ export async function PUT(request) {
   try {
     const { name, email, profilePicture } = await request.json();
     console.log("Updating User:", { name, email, profilePicture });
+    console.log('PROBLEMA E V API PROFILEEEEEEEE')
 
     const existingUser = await prisma.user.findUnique({
       where: { email: email },
@@ -970,7 +1104,6 @@ export async function POST(request) {
 
 ## File: app/api/posts/route.ts
 ```ts
-"use client"
 
 interface CustomSession {
   user: {
@@ -985,13 +1118,13 @@ import { getServerSession } from "next-auth/next";
 import prisma from "../../../lib/prisma";
 import { NextAuthOptions } from "next-auth";
 import { authOptions } from "../../../lib/authOptions";
+import { PrismaClient } from "@prisma/client";
 
 export async function GET() {
   const session = await getServerSession(authOptions as NextAuthOptions) as CustomSession;
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
-
   try {
     const posts = await prisma.post.findMany({
       include: {
@@ -1045,25 +1178,25 @@ export async function POST(request: Request) {
 
 ## File: app/api/posts/[id]/influence/route.js
 ```js
-
+// app/api/posts/[postId]/influence/route.js
 
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../../../../lib/authOptions";
 
-export async function POST(request) {
+export async function POST(request, { params }) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    console.log("Unauthorized access to like route");
+    console.log("Unauthorized access to influence route");
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // Extract post ID from the request URL
-  const url = new URL(request.url);
-  const postId = Number(url.pathname.split('/').pop());
+  const postId = Number(params.id);
 
   try {
+console.log('PROBLEMA E V API INFLUENCEEEEEE')
+
     const post = await prisma.post.findUnique({
       where: { id: postId },
     });
@@ -1075,7 +1208,7 @@ export async function POST(request) {
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId: postId,
-        userId: session?.user.id,
+        userId: session.user.id*1,
         type: "like",
       },
     });
@@ -1111,7 +1244,7 @@ export async function POST(request) {
 
 // pages/api/posts/[id]/like.js
 import { getSession } from "next-auth/react"
-import prisma from "../../../../../prisma"
+import prisma from "../../../../lib/prisma"
 
 export default async function handler(req, res) {
   const { id } = req.query
@@ -1167,7 +1300,7 @@ export default async function handler(req, res) {
 
 // pages/api/posts/[id]/pray.js
 import { getSession } from "next-auth/react"
-import prisma from "../../../../../prisma"
+import prisma from "../../../../lib/prisma"
 
 export default async function handler(req, res) {
   const { id } = req.query
@@ -1196,31 +1329,36 @@ export default async function handler(req, res) {
 ## File: app/api/posts/[id]/delete/route.js
 ```js
 
-
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
-import { NextResponse } from "next/server";
 import { authOptions } from "../../../../../lib/authOptions";
 
-export async function POST(request) {
+export async function POST(request, { params }) {
+  const { id } = params; // Post ID
   const session = await getServerSession(authOptions);
+
   if (!session) {
     console.log("Unauthorized access to delete route");
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
 
-  // Extract post ID from the request URL
-  const url = new URL(request.url);
-  const postId = Number(url.pathname.split('/').pop());
+  const postId = Number(id);
 
   try {
+console.log('PROBLEMA E V API DELETEEEE')
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: { influences: true },
     });
 
     if (!post) {
-      return NextResponse.json({ message: "Post not found" }, { status: 404 });
+      return new Response(JSON.stringify({ message: "Post not found" }), { status: 404 });
+    }
+
+    // Check if the user is the owner of the post
+    if (post.authorId !== parseInt(session.user.id)) {
+      console.log(post);
+      return new Response(JSON.stringify({ message: "Unauthorized to delete this post" }), { status: 403 });
     }
 
     await prisma.influence.deleteMany({
@@ -1232,10 +1370,10 @@ export async function POST(request) {
     });
 
     console.log(`Post deleted with ID: ${postId}`);
-    return NextResponse.json({ message: "Post deleted successfully" }, { status: 200 });
+    return new Response(JSON.stringify({ message: "Post deleted successfully" }), { status: 200 });
   } catch (error) {
     console.error("Error deleting post:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }
 
@@ -1281,7 +1419,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId,
-        userId: session.user.id,
+        userId: Number(session.user.id) *1,
       },
     });
 
@@ -1298,7 +1436,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         data: {
           type,
           postId,
-          userId: session.user.id,
+          userId: Number(session.user.id) *1,
         },
       });
       console.log(`Influence added for postId: ${postId}, userId: ${session.user.id}`);
@@ -1314,7 +1452,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
 ## File: app/api/auth/[...nextauth]/route.ts
 ```ts
-"use client"
 
 import NextAuth from "next-auth";
 import { authOptions } from "../../../../lib/authOptions"; // Adjust the path as necessary
@@ -1325,99 +1462,56 @@ export { handler as GET, handler as POST };
 
 ```
 
-## File: app/api/auth/register/route.js
-```js
-
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import prisma from '../../../../lib/prisma';
-
-export async function POST(request) {
-  const { name, email, password } = await request.json();
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-  });
-
-  return NextResponse.json(user);
-}
-
-```
-
-## File: app/auth/register.js
-```js
-
-
-import prisma from "../../../lib/prisma"
-import bcrypt from "bcrypt"
-
-export default async function handler(req, res) {
-  if (req.method === "POST") {
-    const { name, email, password, interests } = req.body
-    const avatar = req.files?.avatar ? `/avatars/${req.files.avatar.newFilename}` : null
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    try {
-      const user = await prisma.user.create({
-        data: {
-          name,
-          email,
-          password: hashedPassword,
-          avatar,
-          interests: JSON.parse(interests),
-        },
-      })
-      res.status(201).json({ message: "User created", user })
-    } catch (error) {
-      res.status(400).json({ message: "User creation failed", error })
-    }
-  } else {
-    res.setHeader("Allow", ["POST"])
-    res.status(405).end(`Method ${req.method} Not Allowed`)
-  }
-}
-
-```
-
 ## File: app/auth/signin/page.jsx
 ```jsx
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { NotificationContext } from "../../NotificationProvider";
+import { signIn } from "next-auth/react";
 
 export default function SignIn() {
   const { showNotification } = useContext(NotificationContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  
+  // const router = useRouter();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await signIn("credentials", {
+  //       email: email,
+  //       password: password,
+  //       redirect: false,
+  //     });
+  //     if (res?.error) {
+  //       showNotification(res.error, "failure");
+  //     } else if (res?.ok) {
+  //       showNotification("Welcome back, " + email, "success");
+  //       router.push("/feed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Sign in error:", error);
+  //     showNotification("An unexpected error occurred", "failure");
+  //   }
+  // };
   
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault();
     const res = await signIn("credentials", {
-      // callbackUrl: "/feed",
-      username: email,
-      password: password,
-      redirect: false,
+      email,
+      password,
+      redirect: true,
+      callbackUrl: "/feed",
     });
-    if (res.ok) {
-      console.log('res is ok my nigga')
-      console.log(res)
-      showNotification("Welcome back, "+email, "success")
-      router.push("/feed");
-    } else {
-      showNotification("Failed to sign in", "failure");
+    console.log(res)
+  
+    if (res?.error) {
+      showNotification(res.error, "failure");
     }
   };
+  
   
   
   return (
@@ -1496,7 +1590,7 @@ else{
       });
       
       if (res.ok) {
-        showNotification("Registration successful, welcome to Spiritual Thoughts, "+name+"!", "success")
+        showNotification("Registration successful, welcome!", "success")
         router.push("/auth/signin");
       } else {
         showNotification('Registration was not successfull, please try again after a while. It\'s not you, it us!', 'failure')
@@ -1839,7 +1933,7 @@ const isAuthor = session?.user?.email === post.author.email;
         {post.influences.map((influence) => (
           <div key={influence.id} className="flex items-center space-x-2">
             <Image
-              src={influence.user.profilePicture}
+              src={influence.user.profilePicture || "/images/user.png"}
               alt={influence.user.name.substring(0,3) + ".."}
               width={24}
               height={24}
@@ -2021,7 +2115,7 @@ export default function NavBar() {
     showNotification("See ya, " + session.user.name, "goodbye");
     setTimeout(() => {
       signOut({ callbackUrl: '/' });
-    }, 2000);
+    }, 1000);
   };
 
   return (
@@ -2206,10 +2300,10 @@ const Thrash: React.FC = () => {
 
 
   return (
-    <div className="w-10 h-10">
+    <div className="w-9 h-9">
       <DotLottiePlayer
         ref={playerRef}
-        src={"images/thrash.lottie"}
+        src={"/images/thrash.lottie"}
         autoplay={false}
         loop={false}
         onMouseEnter={handleMouseEnter}
@@ -2230,7 +2324,7 @@ import Image from "next/image";
 const Avatars = () => {
   return (
     <div>
-      <Image src="/images/avatar.png" alt="Avatar" width={100} height={100} />
+      <Image src="/images/user.png" alt="Avatar" width={100} height={100} />
     </div>
   );
 };
@@ -2315,7 +2409,7 @@ export function ProfileForm({ user }) {
 
       <div className="mb-6 flex justify-center">
         <Image
-          src={profilePicture}
+          src={profilePicture || "/images/user.png"}
           alt={`${name}'s Profile Picture`}
           width={200}
           height={200}
@@ -2733,20 +2827,20 @@ export default function HomePage() {
 
 ```
 
-## File: lib/prisma.js
-```js
-// lib/prisma.js
+## File: lib/prisma.ts
+```ts
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global;
+let prisma: PrismaClient;
 
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ["query"],
-  });
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
+} else {
+  if (!(global as any).prisma) {
+    (global as any).prisma = new PrismaClient();
+  }
+  prisma = (global as any).prisma;
+}
 
 export default prisma;
 
@@ -2754,65 +2848,93 @@ export default prisma;
 
 ## File: lib/authOptions.ts
 ```ts
-// lib/authOptions.ts
-import { NextAuthOptions } from "next-auth";
-import GithubProvider from "next-auth/providers/github";
+import NextAuth, { NextAuthOptions, User, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "../lib/prisma";
 import { compare } from "bcryptjs";
+import prisma from "./prisma";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
-interface SessionUser {
+interface ExtendedUser extends User {
   id: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
+interface ExtendedSession extends Session {
+  user: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  }
 }
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
-    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) {
-          return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing email or password");
         }
+      
         const user = await prisma.user.findUnique({
-          where: { email: credentials.username },
+          where: { email: credentials.email }
         });
-
-        if (user && (await compare(credentials.password, user.password))) {
-          const { password: _password, ...userWithoutPassword } = user; // Prefix with _
-          console.log(_password.substring(0,2))
-          return userWithoutPassword;
+      
+        if (!user || !user.password) {
+          throw new Error("No user found");
         }
-        return null;
-      },
-    }),
+      
+        const isPasswordValid = await compare(credentials.password, user.password);
+      
+        if (!isPasswordValid) {
+          throw new Error("Invalid password");
+        }
+      
+        return {
+          id: user.id.toString(),
+          email: user.email,
+          name: user.name,
+        };
+      }
+      
+    })
   ],
-  session: {
-    strategy: "jwt",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/auth/signin",
-  },
   callbacks: {
-    session: async ({ session, token }) => {
-      if (token && token.sub) {
-        (session.user as SessionUser).id = token.sub;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
       }
       return session;
-    },
+    }
+  },
+  pages: {
+    signIn: '/auth/signin',
   },
 };
+
+export default NextAuth(authOptions);
 
 ```
 

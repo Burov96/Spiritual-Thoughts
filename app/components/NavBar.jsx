@@ -24,7 +24,7 @@ export default function NavBar() {
     showNotification("See ya, " + session.user.name, "goodbye");
     setTimeout(() => {
       signOut({ callbackUrl: '/' });
-    }, 2000);
+    }, 1000);
   };
 
   return (

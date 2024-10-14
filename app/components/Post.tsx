@@ -6,6 +6,7 @@ import Image from "next/image";
 import Like from "./Like";
 import { revalidatePath } from "next/cache";
 import { useNotification } from "../NotificationProvider";
+import UserOP from "../components/UserOP"
 
 export interface User {
   id: number;
@@ -125,10 +126,13 @@ const isAuthor = session?.user?.email === post.author.email;
   };
 
   return (
-    <div className="p-4 border rounded shadow hover:shadow-xl">
+    <div className="transition-all p-4 border rounded shadow hover:shadow-xl flex flex-col relative min-h-52">
+<UserOP id={post.authorId} />
       <p>{post.content}</p>
+      <div className="mt-4 transition-all flex">
+
       <div className="flex space-x-4 mt-2">
-        <button onClick={handleInfluence} className="text-purple-500">
+        <button onClick={handleInfluence} className=" text-purple-500">
           {<Like userInfluenced={userInfluenced} />}
            ({influenced})
         </button>
@@ -146,9 +150,10 @@ const isAuthor = session?.user?.email === post.author.email;
             <span>{influence.user.name}</span>
           </div>
         ))}
+        </div>
       </div>
       {isAuthor&& 
-      (<div onClick={ handleDelete } className="flex flex-row-reverse top cursor-pointer">❌</div>)}
+      (<div onClick={ handleDelete } className="absolute bottom-2 right-2 text-red-500 hover:text-red-700 transition-colors duration-200 cursor-pointer">❌</div>)}
     </div>
   );
 }

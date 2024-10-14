@@ -6,7 +6,6 @@ import { authOptions } from "../../../lib/authOptions";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  console.log("Session:", session);
 
   if (!session) {
     console.log("No session found");
@@ -18,6 +17,7 @@ export async function GET() {
 
   try {
     const user = await prisma.user.findUnique({
+
       where: { email: session.user.email },
       select: { id: true, name: true, email: true, profilePicture: true },
     });
@@ -47,7 +47,6 @@ export async function PUT(request) {
 
   try {
     const { name, email, profilePicture } = await request.json();
-    console.log("Updating User:", { name, email, profilePicture });
 
     const existingUser = await prisma.user.findUnique({
       where: { email: email },

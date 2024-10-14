@@ -18,7 +18,6 @@ export async function GET() {
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
-
   try {
     const posts = await prisma.post.findMany({
       include: {

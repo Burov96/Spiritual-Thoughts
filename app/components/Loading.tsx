@@ -10,7 +10,7 @@ interface LoadingProps {
 
 const Loading = ({ width = 700, height = 700 }: LoadingProps) => {
   return (
-    <div className="flex justify-center align-middle loading-container">
+    <div className="flex justify-center align-middle loading-container bg-slate-300 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <DotLottiePlayer
         src="/images/loading.lottie"
         autoplay

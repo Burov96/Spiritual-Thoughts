@@ -14,6 +14,7 @@ export default function Feed() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
+
   console.log(session);
 
   useEffect(() => {
@@ -35,11 +36,15 @@ export default function Feed() {
   }
 
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="max-h-screen overflow-scroll max-w-xl mx-auto">
       <PostForm onPostAdded={() => fetchPosts(setPosts, showNotification)} />
       <div className="mt-4 space-y-4">
         {posts.map((post) => (
-          <Post key={post.id} post={post} onPostUpdated={() => fetchPosts(setPosts, showNotification)} />
+          <Post
+            key={post.id}
+            post={post}
+            onPostUpdated={() => fetchPosts(setPosts, showNotification)}
+          />
         ))}
       </div>
     </div>

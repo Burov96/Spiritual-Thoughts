@@ -42,7 +42,7 @@ export async function POST(request, { params }) {
         data: {
           type: "like",
           postId: postId,
-          userId: session.user.id,
+          userId: session.user.id*1,
         },
       });
       console.log(`Post liked with ID: ${postId}`);

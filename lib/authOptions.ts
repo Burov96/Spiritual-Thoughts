@@ -1,21 +1,23 @@
-import NextAuth, { NextAuthOptions, User, Session } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import prisma from "./prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 
-interface ExtendedUser extends User {
-  id: string;
-}
 
-interface ExtendedSession extends Session {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
   }
 }
+
+
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -30,27 +32,28 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Missing email or password");
         }
-
+      
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
-
+      
         if (!user || !user.password) {
           throw new Error("No user found");
         }
-
+      
         const isPasswordValid = await compare(credentials.password, user.password);
-
+      
         if (!isPasswordValid) {
           throw new Error("Invalid password");
         }
-
+      
         return {
-          id: user.id,
+          id: user.id.toString(),
           email: user.email,
           name: user.name,
         };
       }
+      
     })
   ],
   callbacks: {
@@ -60,15 +63,18 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }): Promise<ExtendedSession> {
+    async session({ session, token }) {
       if (session.user) {
-        (session.user as ExtendedUser).id = token.id as string;
+        session.user.id = token.id as string;
       }
-      return session as ExtendedSession;
+      return session;
     }
   },
   pages: {
     signIn: '/auth/signin',
+  },
+  session: {
+    strategy: "jwt",
   },
 };
 

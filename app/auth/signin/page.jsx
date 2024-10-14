@@ -1,33 +1,47 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useContext, useState } from "react";
-import { useRouter } from "next/navigation";
 import { NotificationContext } from "../../NotificationProvider";
+import { signIn } from "next-auth/react";
 
 export default function SignIn() {
   const { showNotification } = useContext(NotificationContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  
+  // const router = useRouter();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await signIn("credentials", {
+  //       email: email,
+  //       password: password,
+  //       redirect: false,
+  //     });
+  //     if (res?.error) {
+  //       showNotification(res.error, "failure");
+  //     } else if (res?.ok) {
+  //       showNotification("Welcome back, " + email, "success");
+  //       router.push("/feed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Sign in error:", error);
+  //     showNotification("An unexpected error occurred", "failure");
+  //   }
+  // };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await signIn("credentials", {
-        email: email,
-        password: password,
-        redirect: false,
-      });
-      if (res?.error) {
-        showNotification(res.error, "failure");
-      } else if (res?.ok) {
-        showNotification("Welcome back, " + email, "success");
-        router.push("/feed");
-      }
-    } catch (error) {
-      console.error("Sign in error:", error);
-      showNotification("An unexpected error occurred", "failure");
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: true,
+      callbackUrl: "/feed",
+    });
+    console.log(res)
+  
+    if (res?.error) {
+      showNotification(res.error, "failure");
     }
   };
   

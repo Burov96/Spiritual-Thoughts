@@ -1,32 +1,20 @@
-"use client"
 
 import { getServerSession } from "next-auth/next";
-import prisma from "../../../../lib/prisma";
-import { authOptions } from "../../../../lib/authOptions";
+import prisma from "../../../../../lib/prisma";
+import { authOptions } from "../../../../../lib/authOptions";
 
-// Define a custom session type
-interface CustomSession {
-  user: {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
+export async function POST(request, { params }) {
+  const { id } = params; // Post ID
+  const session = await getServerSession(authOptions);
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  // Assert that the session is of type CustomSession
-  const session = (await getServerSession(authOptions)) as CustomSession;
-
-  if (!session || !session.user.id) {
+  if (!session) {
     console.log("Unauthorized access to influence route");
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
 
   const { type } = await request.json();
-  const postId = Number(params.id);
+  const postId = Number(id);
 
-  // Input validation
   if (!type || typeof type !== 'string') {
     console.log("Invalid influence type");
     return new Response(JSON.stringify({ message: "Invalid influence type" }), { status: 400 });
@@ -36,7 +24,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const existingInfluence = await prisma.influence.findFirst({
       where: {
         postId,
-        userId: Number(session.user.id) *1,
+        userId: parseInt(session.user.id),
       },
     });
 
@@ -53,7 +41,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         data: {
           type,
           postId,
-          userId: Number(session.user.id) *1,
+          userId: parseInt(session.user.id),
         },
       });
       console.log(`Influence added for postId: ${postId}, userId: ${session.user.id}`);

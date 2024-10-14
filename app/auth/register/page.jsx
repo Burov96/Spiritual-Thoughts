@@ -42,7 +42,7 @@ else{
       });
       
       if (res.ok) {
-        showNotification("Registration successful, welcome to Spiritual Thoughts, "+name+"!", "success")
+        showNotification("Registration successful, welcome!", "success")
         router.push("/auth/signin");
       } else {
         showNotification('Registration was not successfull, please try again after a while. It\'s not you, it us!', 'failure')

@@ -2,7 +2,7 @@
 
 // pages/api/posts/[id]/pray.js
 import { getSession } from "next-auth/react"
-import prisma from "../../../../../prisma"
+import prisma from "../../../../lib/prisma"
 
 export default async function handler(req, res) {
   const { id } = req.query
