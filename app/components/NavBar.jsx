@@ -29,11 +29,11 @@ export default function NavBar() {
 
   return (
   <>
-    <nav className="rounded-md my-9 w-full bg-gray-800 text-white p-4 flex justify-between items-center relative z-20" ref={menuRef}>
+    <nav className="rounded-md md:my-9 w-full bg-gray-800 text-white md:pl-0  pl-5 md:p-4 flex justify-between items-center relative z-20" ref={menuRef}>
     {isMobileMenuOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-10  duration-500 transition-opacity"></div>
     )}
-      <Link href="/" className="md:text-2xl text-l font-bold">
+      <Link href="/" className="md:text-2xl text-center text-2xl font-bold">
         Spiritual Thoughts
       </Link>
       <div className="hidden md:flex space-x-4">
