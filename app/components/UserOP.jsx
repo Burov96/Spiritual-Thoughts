@@ -32,10 +32,12 @@ export default function UserOP({ id }) {
   userData &&
       <div className=" flex italic m-2 p-1">
       <Image src={userData.profilePicture} width={32} height={32}/>
-      <div className="transition-all font-semibold capitalize mx-2 font-mono" style={{ color: color }}>
+      <div className="transition-all duration-700 font-semibold capitalize mx-1 font-mono" style={{ color: color }}>
       {userData.name} 
       </div>
+      <span className="text-sm font-mono">
        {`:    just thought about:`}
+      </span>
       </div>
     )
 );

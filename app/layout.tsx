@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <NotificationProvider>
             <div className="flex flex-col h-screen overflow-hidden">
               <NavBar />
-              <main className="flex-grow overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+              <main className="flex-grow  px-4 py-6 sm:px-6 lg:px-8">
                 <div className="max-w-7xl mx-auto">
                   {children}
                 </div>
