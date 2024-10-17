@@ -41,7 +41,7 @@ export function PostForm() {
         onChange={(e) => setContent(e.target.value)}
         placeholder="Share your thought..."
         required
-        className={`m-2 p-2 border rounded-lg outline hover:outline-4 outline-2 outline-gray-500 focus-within:outline-gray-600 focus-within:outline-offset-2 focus-within:outline-4 transition-all duration-500 text-black ${content.length>30?"text-base":"text-lg"}`}
+        className={`m-2 p-2 border rounded-lg outline hover:outline-4 outline-2 outline-gray-500 focus-within:outline-gray-600 focus-within:outline-offset-2 focus-within:outline-4 transition-all duration-500 text-black ${content.length>30?"text-lg":content.length>50?"text-base":"text-xl"}`}
       />
       <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
         Post Thought

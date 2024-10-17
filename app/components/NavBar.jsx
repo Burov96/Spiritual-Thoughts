@@ -6,6 +6,9 @@ import { NotificationContext } from "../NotificationProvider";
 import Link from "next/link";
 import Hamburger from "./Hamburger";
 import { useOutsideClick } from "../utils/outsideClidkFunctionRuner";
+import ProfileIcon from "./ProfileIcon";
+import FeedIcon from "./FeedIcon";
+import LogOutIcon from "./LogOutIcon";
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -39,7 +42,8 @@ export default function NavBar() {
       <div className="hidden md:flex space-x-4">
         {session ? (
           <>
-            <Link href="/profile">Profile
+            <Link href="/profile">
+            Profile
             </Link>
             <Link href="/feed" className="hover:underline">
               Feed
@@ -63,15 +67,19 @@ export default function NavBar() {
           <button onClick={toggleMenu} ref={exception}>
             <Hamburger open={isMobileMenuOpen} />
           </button>
-            <div className={`absolute top-32 ${isMobileMenuOpen?"right-4":"-right-32"} transition-all bg-gray-800 p-4 rounded-md z-30 border-2 border-emerald-300`}  ref={userMenuException}>
+            <div className={`absolute top-32 ${isMobileMenuOpen?"right-4":"-right-40"} transition-all bg-gray-800 p-4 rounded-md z-30 border-2 border-emerald-300`}  ref={userMenuException}>
             {session ? (
               <div>
-                <Link href="/profile">Profile
+                <Link href="/profile" className="flex hover:underline my-4">
+            <ProfileIcon />
+                Profile
                 </Link>
-                <Link href="/feed" className="block hover:underline mb-2">
+                <Link href="/feed" className="flex hover:underline my-4">
+                <FeedIcon />
                   Feed
                 </Link>
-                <button onClick={handleSignOut} className="hover:underline">
+                <button onClick={handleSignOut} className="hover:underline my-4 flex">
+                  <LogOutIcon />
                   Sign Out
                 </button>
               </div>

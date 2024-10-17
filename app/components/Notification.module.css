@@ -5,7 +5,7 @@
   position: fixed;
   right: 1rem;
   width: 15rem;
-  height: 4rem;
+  height: min-content;
   background-color: white;
   padding: 1rem;
   border-radius: 0.5rem;

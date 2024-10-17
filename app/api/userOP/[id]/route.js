@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 
+
 export async function GET(request, {params}) { 
 const {id} = params
   try {
       const user = await prisma.user.findUnique({
         where: { id: id*1 },
-        select: { id: true, name: true, profilePicture: true },
+        select: { id: true, name: true, profilePicture: true, color:true},
       });
       if (!user) {
         return NextResponse.json({ message: "User not found" }, { status: 404 });}
-
-      console.log("User Data:", user);
       return NextResponse.json(user, { status: 200 });
     } catch (error) {
       console.error("Error fetching OP's profile:", error);

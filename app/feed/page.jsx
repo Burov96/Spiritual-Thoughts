@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Post } from "../components/Post";
 import { PostForm } from "../components/PostForm";
-import { useNotification } from "../NotificationProvider"; // Correct import
+import { useNotification } from "../NotificationProvider"; 
 import { usePathname, useRouter } from "next/navigation";
 import { Loading } from "../components/Loading";
 
 export default function Feed() {
-  const { showNotification } = useNotification(); // Use the hook directly
+  const { showNotification } = useNotification(); 
   const pathname = usePathname();
   const router = useRouter();
   const [posts, setPosts] = useState([]);
@@ -36,7 +36,7 @@ export default function Feed() {
   }
 
   return (
-    <div className="max-h-screen overflow-scroll max-w-xl mx-auto">
+    <div className="  max-w-xl mx-auto">
       <PostForm onPostAdded={() => fetchPosts(setPosts, showNotification)} />
       <div className="mt-4 space-y-4">
         {posts.map((post) => (

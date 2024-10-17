@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import {randomColor} from 'randomcolor'
 
 export default function UserOP({ id }) {
   const [userData, setUserData] = useState(null);
@@ -17,7 +16,6 @@ export default function UserOP({ id }) {
         }
         const data = await response.json();
         setUserData(data);
-        console.log(data);
       } catch (error) {
         console.error(error);
       }
@@ -26,13 +24,12 @@ export default function UserOP({ id }) {
       fetchUserOP();
     }
   }, [id]);
-  const color = randomColor()
   return (
     (
   userData &&
       <div className=" flex italic m-2 p-1">
       <Image src={userData.profilePicture} width={32} height={32}/>
-      <div className="transition-all duration-700 font-semibold capitalize mx-1 font-mono" style={{ color: color }}>
+      <div className="transition-all duration-700 font-semibold capitalize mx-1 font-mono" style={{ color: userData.color }}>
       {userData.name} 
       </div>
       <span className="text-sm font-mono">

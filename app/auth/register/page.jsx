@@ -45,7 +45,7 @@ else{
         showNotification("Registration successful, welcome!", "success")
         router.push("/auth/signin");
       } else {
-        showNotification('Registration was not successfull, please try again after a while. It\'s not you, it us!', 'failure')
+        showNotification('Registration was not successfull, please try again after a while. It\'s not you, it us!', 'failure', true)
         const errorData = await res.json();
         alert(`Registration failed: ${errorData.message}`);
       }
@@ -58,7 +58,7 @@ else{
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Register</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-2 w-80">
+      <form onSubmit={handleSubmit} className="text-black flex flex-col space-y-2 w-80">
         <input
           type="text"
           placeholder="Name"

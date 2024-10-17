@@ -1,15 +1,23 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { NotificationContext } from "../../NotificationProvider";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 export default function SignIn() {
   const { showNotification } = useContext(NotificationContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
-  // const router = useRouter();
+  const session = useSession();
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      showNotification("You're already signed in", "warning");
+      setTimeout(() => {
+        window.location.replace("/feed");
+      }, 1000);
+    }
+  }, []);
+    // const router = useRouter();
   // const handleSubmit = async (e) => {
   //   e.preventDefault();
   //   try {

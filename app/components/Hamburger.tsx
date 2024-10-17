@@ -22,7 +22,7 @@ const Hamburger: React.FC<BurgerOpened> = ({ open }) => {
     <div className='w-20'>
       <DotLottiePlayer
         ref={playerRef}
-        src="images/hamburger.lottie"
+        src="/images/hamburger.lottie"
         autoplay={false}
         loop={false}
       />

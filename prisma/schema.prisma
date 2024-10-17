@@ -19,6 +19,7 @@ model User {
   likes     Like[]
   prayers   Prayer[]
   influences Influence[]
+  color          String?  
 }
 
 model Post {
