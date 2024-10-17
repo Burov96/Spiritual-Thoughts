@@ -87,7 +87,6 @@ const isAuthor = session?.user?.email === post.author.email;
         body: JSON.stringify({ type: "feel" }),
       });
       const data = await response.json();
-      // console.log(data)
       if (response.ok) {
         if (data.message === "Post liked") {
           setInfluenced((prev) => prev + 1);
@@ -121,7 +120,6 @@ const isAuthor = session?.user?.email === post.author.email;
       }
     } catch (error) {
       console.log(error)
-      // showNotification("An error occurred while deleting the post. Please try again.", "failure");
     }
   };
 
@@ -137,9 +135,9 @@ const isAuthor = session?.user?.email === post.author.email;
            ({influenced})
         </button>
       </div>
-      <div className="mt-4">
+      <div className={`mt-4 ${post.influences.length>2 &&"grid grid-cols-2 gap-1"}`}>
         {post.influences.map((influence) => (
-          <div key={influence.id} className="flex items-center space-x-2">
+          <div key={influence.id} className="flex  items-center space-x-2">
             <Image
               src={influence.user.profilePicture || "/images/user.png"}
               alt={influence.user.name.substring(0,3) + ".."}
@@ -147,7 +145,9 @@ const isAuthor = session?.user?.email === post.author.email;
               height={24}
               className="rounded-full"
               />
+              {post.influences.length<3 && 
             <span>{influence.user.name}</span>
+              }
           </div>
         ))}
         </div>
