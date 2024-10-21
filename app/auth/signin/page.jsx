@@ -23,13 +23,21 @@ export default function SignIn() {
     const res = await signIn("credentials", {
       email,
       password,
-      redirect: true,
+      redirect: false,
       callbackUrl: "/feed",
     });
   
     if (res?.error) {
-      showNotification(res.error, "failure");
+      console.log(res)
+      showNotification(`${res.error}`, "failure");
+    }else {
+      console.log(res)
+      showNotification("Welcome back, "+email, "success");
+      setTimeout(() => {
+        window.location.replace(res?.url || "/feed");
+      }, 1000);
     }
+
   };
   
   
