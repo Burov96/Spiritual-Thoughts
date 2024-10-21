@@ -35,7 +35,7 @@ export default function UserOP({ id }) {
   useEffect(() => {
     if(loggedInUser.data.user.name === userData?.name) {
       setInterval(() => {
-        setColor(randomColor());
+        setColor("#d4af37");
         setRandomized((prev)=>!prev);
       }, 7000);
     }

@@ -13,7 +13,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
 
   if (status === "authenticated") {

@@ -13,7 +13,7 @@ export default function Feed() {
   const pathname = usePathname();
   const router = useRouter();
   const [posts, setPosts] = useState([]);
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
 
   useEffect(() => {
