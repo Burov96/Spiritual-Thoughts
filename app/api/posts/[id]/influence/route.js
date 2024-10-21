@@ -1,4 +1,3 @@
-// app/api/posts/[postId]/influence/route.js
 
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";

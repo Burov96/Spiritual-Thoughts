@@ -9,13 +9,7 @@ import React, { useRef } from "react";
 const Thrash: React.FC = () => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
 
-  const handleMouseEnter = () => {
-    if (playerRef.current) {
-      console.log("hovered");
-      playerRef.current.setSpeed(3);
-        playerRef.current.playSegments([10, 11], false);
-    }
-  };
+
 
 
   return (
@@ -23,9 +17,8 @@ const Thrash: React.FC = () => {
       <DotLottiePlayer
         ref={playerRef}
         src={"/images/thrash.lottie"}
-        autoplay={false}
-        loop={false}
-        onMouseEnter={handleMouseEnter}
+        autoplay={true}
+        loop={true}
       />
     </div>
   );

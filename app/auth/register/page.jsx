@@ -15,7 +15,6 @@ export default function Register() {
 
   const { data: session, status } = useSession();
 
-  console.log(session)
 
   if (status === "authenticated") {
     router.push("/feed");

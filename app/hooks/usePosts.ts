@@ -57,7 +57,7 @@ export function usePosts() {
     });
   };
 
-  // Fetch posts on component mount
+  
   useEffect(() => {
     async function fetchPosts() {
       try {

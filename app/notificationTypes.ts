@@ -1,5 +1,3 @@
-// app/notificationTypes.ts
-
 export type NotificationType =
   | "success"
   | "failure"

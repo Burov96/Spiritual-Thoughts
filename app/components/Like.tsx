@@ -36,7 +36,7 @@ const Like = ({ userInfluenced }: LikeProps) => {
     <div className='w-10 h-10'>
       <DotLottiePlayer
         ref={playerRef}
-        src={"images/like2.lottie"}
+        src={"/images/like2.lottie"}
         autoplay={false}
         loop={false}
       />

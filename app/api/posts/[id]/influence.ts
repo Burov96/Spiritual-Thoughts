@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/authOptions";
 
-// Define a custom session type
+
 interface CustomSession {
   user: {
     id: string;
@@ -15,7 +15,7 @@ interface CustomSession {
 }
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
-  // Assert that the session is of type CustomSession
+  
   const session = (await getServerSession(authOptions)) as CustomSession;
 
   if (!session || !session.user.id) {
@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const { type } = await request.json();
   const postId = Number(params.id);
 
-  // Input validation
+  
   if (!type || typeof type !== 'string') {
     console.log("Invalid influence type");
     return new Response(JSON.stringify({ message: "Invalid influence type" }), { status: 400 });

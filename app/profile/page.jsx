@@ -8,6 +8,13 @@ import { useSession } from "next-auth/react";
 import {ProfileForm} from "../../app/components/ProfileForm"
 
 export default function Profile(){
+
+  const GetProfile = async () => {
+    fetch(`/api/profile/`)
+    .then((res) => res.json())
+    .then((data) => setUserData(data))
+    .catch((err) => showNotification(err,"failure"));
+  };
   const {data:session, status} = useSession();
   const [userData, setUserData] = useState(null);
   const {showNotification} = useNotification();
@@ -20,12 +27,7 @@ export default function Profile(){
     router.push("/login");
     showNotification("In order to access your profile, first login","failure");
   }
-  else{
-    fetch(`/api/profile/`)
-    .then((res) => res.json())
-    .then((data) => setUserData(data))
-    .catch((err) => showNotification(err,"failure"));
-  }},[status, session])
+  else{GetProfile()}},[status, session])
   return(
     <div className="profile-counter">
       <h1>Your Profile</h1>

@@ -12,8 +12,6 @@ export default function AvatarUpload() {
       body: formData,
     })
     const data = await res.json()
-    console.log(data)
-    // Update user profile with avatar URL
   }
 
   return (

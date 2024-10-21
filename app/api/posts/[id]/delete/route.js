@@ -4,7 +4,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; // Post ID
+  const { id } = params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -15,7 +15,6 @@ export async function POST(request, { params }) {
   const postId = Number(id);
 
   try {
-console.log('PROBLEMA E V API DELETEEEE')
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: { influences: true },
@@ -25,7 +24,7 @@ console.log('PROBLEMA E V API DELETEEEE')
       return new Response(JSON.stringify({ message: "Post not found" }), { status: 404 });
     }
 
-    // Check if the user is the owner of the post
+    
     if (post.authorId !== parseInt(session.user.id)) {
       console.log(post);
       return new Response(JSON.stringify({ message: "Unauthorized to delete this post" }), { status: 403 });

@@ -1,11 +1,11 @@
-// app/api/posts/[id]/like/route.js
+
 
 import { getServerSession } from "next-auth/next";
 import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; // Post ID
+  const { id } = params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {

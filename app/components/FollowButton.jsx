@@ -1,19 +1,24 @@
 "use client"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
+import { useNotification } from "../NotificationProvider"
 
 export default function FollowButton({ userId }) {
   const { data: session } = useSession()
   const [isFollowing, setIsFollowing] = useState(false)
+  const { showNotification } = useNotification();
+  
 
   const handleFollow = async () => {
     await fetch(`/api/users/${userId}/follow`, { method: "POST" })
     setIsFollowing(true)
+    showNotification("Followed successfully", "success")
   }
 
   const handleUnfollow = async () => {
     await fetch(`/api/users/${userId}/unfollow`, { method: "POST" })
     setIsFollowing(false)
+    showNotification("Unfollowed successfully", "success")
   }
 
   if (!session) return null

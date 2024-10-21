@@ -4,7 +4,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; // ID of the user to unfollow
+  const { id } = params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {

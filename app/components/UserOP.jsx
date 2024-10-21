@@ -38,17 +38,17 @@ export default function UserOP({ id }) {
         setColor(randomColor());
         setRandomized((prev)=>!prev);
       }, 7000);
+    }
       
       setTimeout(() => {
-        setColor(userData.color);
+        setColor(userData?.color);
       }, 1000);
-    }
     }, [userData, randomized])
   return (
     (
   userData &&
       <div className=" flex italic m-2 p-1">
-      <Image src={userData.profilePicture} width={32} height={32}/>
+      <Image src={userData.profilePicture ||"/images/user.png" || "https://i.ibb.co/Qv0nQSg/user.png"} width={32} height={32}/>
       <div className="transition-all duration-500 font-semibold capitalize mx-1 font-mono" style={{ color: color }}>
       {userData.name} 
       </div>

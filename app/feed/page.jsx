@@ -15,7 +15,6 @@ export default function Feed() {
   const [posts, setPosts] = useState([]);
   const { data: session, status } = useSession();
 
-  console.log(session);
 
   useEffect(() => {
     if (status === "unauthenticated" && pathname !== "/") {

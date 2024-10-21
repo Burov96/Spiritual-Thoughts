@@ -17,27 +17,7 @@ export default function SignIn() {
       }, 1000);
     }
   }, []);
-    // const router = useRouter();
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const res = await signIn("credentials", {
-  //       email: email,
-  //       password: password,
-  //       redirect: false,
-  //     });
-  //     if (res?.error) {
-  //       showNotification(res.error, "failure");
-  //     } else if (res?.ok) {
-  //       showNotification("Welcome back, " + email, "success");
-  //       router.push("/feed");
-  //     }
-  //   } catch (error) {
-  //     console.error("Sign in error:", error);
-  //     showNotification("An unexpected error occurred", "failure");
-  //   }
-  // };
-  
+                                            
   const handleSubmit = async (e) => {
     e.preventDefault();
     const res = await signIn("credentials", {
@@ -46,7 +26,6 @@ export default function SignIn() {
       redirect: true,
       callbackUrl: "/feed",
     });
-    console.log(res)
   
     if (res?.error) {
       showNotification(res.error, "failure");

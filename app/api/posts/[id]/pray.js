@@ -1,6 +1,5 @@
 
 
-// pages/api/posts/[id]/pray.js
 import { getSession } from "next-auth/react"
 import prisma from "../../../../lib/prisma"
 

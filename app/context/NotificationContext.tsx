@@ -18,12 +18,12 @@ import {
   NotificationContextProps,
 } from "../notificationTypes";
 
-// Create the Notification Context with default undefined
+
 const NotificationContext = createContext<NotificationContextProps | undefined>(
   undefined
 );
 
-// Reducer function to handle state transitions
+
 const notificationReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_NOTIFICATION": {
@@ -82,7 +82,7 @@ const notificationReducer = (state: State, action: Action): State => {
   }
 };
 
-// Helper function to find the smallest missing ID
+
 const findSmallestMissingId = (ids: number[]): number => {
   const sortedIds = [...ids].sort((a, b) => a - b);
   let smallestMissingId = 1;
@@ -96,7 +96,7 @@ const findSmallestMissingId = (ids: number[]): number => {
   return smallestMissingId;
 };
 
-// NotificationProvider Component
+
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -115,7 +115,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
       const id = findSmallestMissingId(state.notifications.map((n) => n.id));
       const finalId = id <= state.nextId ? id : state.nextId;
   
-      // Include 'id' in the payload
+      
       dispatch({
         type: "ADD_NOTIFICATION",
         payload: { id: finalId, message, type, persistent },
@@ -204,7 +204,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// Custom hook to use the Notification Context
+
 export const useNotification = (): NotificationContextProps => {
   const context = useContext(NotificationContext);
   if (context === undefined) {

@@ -7,6 +7,7 @@ import Like from "./Like";
 import { revalidatePath } from "next/cache";
 import { useNotification } from "../NotificationProvider";
 import UserOP from "../components/UserOP"
+import Link from "next/link";
 
 export interface User {
   id: number;
@@ -22,39 +23,7 @@ interface Influence {
 }
 
 interface PostProps {
-  // {
-  //   "id": 1,
-  //   "content": "In the realm of code and spirit, remember: while bugs may haunt your app like restless spirits, patience and debugging are the sage's path to enlightenment.",
-  //   "authorId": 1,
-  //   "createdAt": "2024-09-27T12:40:42.639Z",
-  //   "author": {
-  //     "id": 1,
-  //     "name": "Teodor",
-  //     "email": "burov96@gmail.com",
-  //     "profilePicture": "https://img.freepik.com/free-vector/groovy-hippie-with-peace-sunglasses_1308-162780.jpg?t=st=1728640246~exp=1728643846~hmac=fb9d30601d398104869f84cf42f8ed0008866423ebef234db9733880ac211844&w=1800",
-  //     "password": "$2a$12$sMlUXfIOV.zqs/fryhUFOuMDW3IDuL4u7skw9Mqhohl9Pz6T5mADO",
-  //     "avatar": null
-  //   },
-  //   "likes": [],
-  //   "prayers": [],
-  //   "influences": [
-  //     {
-  //       "id": 391,
-  //       "type": "feel",
-  //       "postId": 1,
-  //       "userId": 1,
-  //       "user": {
-  //         "id": 1,
-  //         "name": "Teodor",
-  //         "email": "burov96@gmail.com",
-  //         "profilePicture": "https://img.freepik.com/free-vector/groovy-hippie-with-peace-sunglasses_1308-162780.jpg?t=st=1728640246~exp=1728643846~hmac=fb9d30601d398104869f84cf42f8ed0008866423ebef234db9733880ac211844&w=1800",
-  //         "password": "$2a$12$sMlUXfIOV.zqs/fryhUFOuMDW3IDuL4u7skw9Mqhohl9Pz6T5mADO",
-  //         "avatar": null
-  //       }
-  //     }
-  //   ]
-  // }
-  post: {
+                                                                  post: {
     authorId: number;
     createdAt: string;
     author: User;
@@ -125,7 +94,9 @@ const isAuthor = session?.user?.email === post.author.email;
 
   return (
     <div className="transition-all p-4 border rounded shadow hover:shadow-xl flex flex-col relative min-h-52">
+      <Link href={`/profile/${post.author.id}`}>
 <UserOP id={post.authorId} />
+      </Link>
       <p>{post.content}</p>
       <div className="mt-4 transition-all flex">
 
@@ -139,7 +110,7 @@ const isAuthor = session?.user?.email === post.author.email;
         {post.influences.map((influence) => (
           <div key={influence.id} className="flex  items-center space-x-2">
             <Image
-              src={influence.user.profilePicture || "/images/user.png"}
+              src={influence.user.profilePicture || "/images/user.png" }
               alt={influence.user.name.substring(0,3) + ".."}
               width={24}
               height={24}

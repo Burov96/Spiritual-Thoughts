@@ -54,7 +54,7 @@ const Notification = ({
         aria-live="assertive"
         aria-atomic="true"
         style={{
-          top: `${10 + id * 7}rem`, // Adjust stacking based on ID
+          top: `${10 + id * 7}rem`, 
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
