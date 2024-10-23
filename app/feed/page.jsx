@@ -30,12 +30,13 @@ export default function Feed() {
     }
   }, [status, pathname, showNotification]);
 
-  if (status === "loading") {
+  if (posts.length<1) {
     return <Loading />;
   }
 
   return (
-    <div className="  max-w-xl mx-auto">
+    <div className="max-w-xl mx-auto overflow-hidden">
+      <div className={`  animate-[growHeight_1s_ease-in-out] ${posts.length>0 ? ' ' : 'max-h-0 opacity-0'} `}>
       <PostForm onPostAdded={() => fetchPosts(setPosts, showNotification)} />
       <div className="mt-4 space-y-4">
         {posts.map((post) => (
@@ -46,6 +47,7 @@ export default function Feed() {
           />
         ))}
       </div>
+    </div>
     </div>
   );
 }

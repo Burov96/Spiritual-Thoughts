@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {Loading} from "./components/Loading";
+import { WelcomePage } from "./components/WelcomePage";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
@@ -15,7 +16,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 px-4">
+    <div className="mb-10 flex flex-col items-center min-h-3/4 py-2 px-4">
+      <WelcomePage />
       <h1 className="text-4xl font-bold mb-4">Welcome to Spiritual Thoughts</h1>
       {session ? (
         <>
@@ -35,7 +37,7 @@ export default function HomePage() {
             Share your spiritual thoughts and connect with others. Let the power
             of collective positivity turn thoughts into reality.
           </p>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 ">
             <Link
               href="/auth/signin"
               className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"

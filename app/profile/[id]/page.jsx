@@ -12,8 +12,9 @@ export default function Profile({params}) {
   const id =params.id
   const [user, setUser] = useState(null)
   const [outlineColor, setOutlineColor] = useState('')
-  const  {session}  = useSession();
+  const { data: session } = useSession();
   console.log(session)
+
   useEffect(() => {
     if (id) {
       fetch(`/api/users/${id}`)
@@ -22,14 +23,14 @@ export default function Profile({params}) {
     }
   }, [id])
   
-  if (!user) return <Loading />
   setTimeout(() => {
     setOutlineColor(randomColor())
   }, 2000);
+  if (!user) return <Loading />
   const color = user.color
   
   return (
-    <div className="transition-colors duration-1000 max-w-md mx-auto p-4 border rounded-lg shadow" style={{borderColor:outlineColor}}>
+    <div className="hover:backdrop-brightness-110 hover:shadow-xl select-none transition-colors duration-1000 max-w-md mx-auto p-4 border-2 rounded-lg shadow" style={{borderColor:outlineColor}}>
       <Image height={96} width={96} src={user.profilePicture || "/images/user.png"} alt="Avatar" className="rounded-full mx-auto" />
       <h2 className="text-xl text-center mt-2 " style={{color:color}}>{user.name}</h2>
       <p className="text-center text-gray-500">{user.email}</p>
