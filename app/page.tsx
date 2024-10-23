@@ -18,11 +18,11 @@ export default function HomePage() {
   return (
     <div className="mb-10 flex flex-col items-center min-h-3/4 py-2 px-4">
       <WelcomePage />
-      <h1 className="text-4xl font-bold mb-4">Welcome to Spiritual Thoughts</h1>
+      <h1 className="-mt-20 text-4xl font-bold mb-4">Welcome to Spiritual Thoughts</h1>
       {session ? (
         <>
           <p className="text-lg mb-8 text-center max-w-md">
-            Hello, {session.user?.name}! Ready to share your spiritual thoughts?
+            Hello, {session.user?.name}! Ready to let your soul speak? 
           </p>
           <Link
             href="/feed"
