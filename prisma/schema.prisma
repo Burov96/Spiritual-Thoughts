@@ -20,6 +20,18 @@ model User {
   prayers   Prayer[]
   influences Influence[]
   color          String?  
+  sentMessages Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Message{
+  id  Int         @id @default(autoincrement())
+  content String 
+  sender User @relation("SentMessages", fields: [senderId], references: [id])
+  senderId Int
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId Int
+  createdAt DateTime  @default(now())
 }
 
 model Post {

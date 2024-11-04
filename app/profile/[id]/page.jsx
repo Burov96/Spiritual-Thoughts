@@ -59,7 +59,7 @@ export default function Profile({ params }) {
               <FollowButton userId={user.id} />
             </div>
             <div className="mt-4">
-              <MessageButton userId={user.id} />
+              <MessageButton receiverId={session.user.id} senderId={user.id}  />
             </div>
           </div>
         ) : (
