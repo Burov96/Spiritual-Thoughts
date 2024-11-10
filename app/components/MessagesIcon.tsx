@@ -3,13 +3,13 @@ import {
   DotLottiePlayer,
 } from "@dotlottie/react-player";
 
-const FeedIcon: React.FC = () => {
+const MessagesIcon: React.FC = () => {
 
 
   return (
     <div className="relative w-8 h-8 m-1">
       <DotLottiePlayer
-        src={"/images/news.lottie"}
+        src={"/images/feed.lottie"}
         autoplay={true}
         loop={true}
       />
@@ -17,4 +17,4 @@ const FeedIcon: React.FC = () => {
   );
 };
 
-export default FeedIcon;
+export default MessagesIcon;

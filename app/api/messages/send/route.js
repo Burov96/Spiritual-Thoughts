@@ -5,17 +5,17 @@ const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
-    const { receiverIdInt, senderId, text } = await req.json();
-
+    const { receiverId, senderId, text } = await req.json();
+console.log('text')
+console.log(text)
     
     const message = await prisma.message.create({
       data: {
         content: text,
-        senderId: parseInt(senderId),
-        receiverId: receiverIdInt, 
+        senderId: parseInt(senderId), 
+        receiverId: parseInt(receiverId),
       },
     });
-
     return new Response(JSON.stringify(message), {
       status: 200,
       headers: {

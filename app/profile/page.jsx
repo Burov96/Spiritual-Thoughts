@@ -6,6 +6,8 @@ import { useNotification } from "../NotificationProvider";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import {ProfileForm} from "../../app/components/ProfileForm"
+import { useNavigation } from "../context/NavigationContext";
+import { PageWrapper } from "../components/PageWrapper";
 
 export default function Profile(){
 
@@ -18,10 +20,16 @@ export default function Profile(){
   const {data:session, status} = useSession();
   const [userData, setUserData] = useState(null);
   const {showNotification} = useNotification();
+  const { direction } = useNavigation();
+
   const router = useRouter();
   useEffect(() => {
   if (status==="loading"){
-    return <Loading/>
+    return (
+    <PageWrapper direction={direction}>
+    <Loading/>
+    </PageWrapper>
+)
   }
   if(!session){
     router.push("/login");
@@ -29,11 +37,14 @@ export default function Profile(){
   }
   else{GetProfile()}},[status, session])
   return(
+    <PageWrapper direction={direction}>
     <div className="profile-counter">
       <h1>Your Profile</h1>
       {userData&&
       <ProfileForm user={userData} />
       }
     </div>
+    </PageWrapper>
+
   )
 }

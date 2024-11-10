@@ -4,14 +4,14 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loading } from "./Loading";
+import { useRouter } from "next/navigation";
 
 export default function MessageButton({ senderId, receiverId }) {
   const { showNotification } = useNotification();
   const [form, setForm] = useState(false);
   const [text, setText] = useState("");
-  const receiverIdInt = receiverId * 1;
-
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -22,14 +22,14 @@ export default function MessageButton({ senderId, receiverId }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ receiverIdInt, senderId, text }),
+        body: JSON.stringify({ receiverId, senderId, text }),
       });
       if (!response.ok) {
         throw new Error("Failed to send message");
       }
       const data = await response.json();
       console.log("Message sent: ", data);
-      showNotification("Message sent:", "success");
+      showNotification("Message sent!", "success");
     } catch (error) {
       console.error(error);
       showNotification("Message have not been sent!", "failure");
@@ -37,6 +37,7 @@ export default function MessageButton({ senderId, receiverId }) {
       setIsLoading(false);
       setText("");
       setForm(false);
+      router.push("/chat");
     }
   };
   const handleMessage = () => {

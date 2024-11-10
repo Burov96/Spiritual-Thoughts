@@ -4,18 +4,26 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {Loading} from "./components/Loading";
 import { WelcomePage } from "./components/WelcomePage";
+import { PageWrapper } from "./components/PageWrapper";
+import { useNavigation } from "./context/NavigationContext";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
+  const { direction } = useNavigation();
+
 
   if (status === "loading") {
     return(
-    <div className="min-h-screen bg-gray-100 ">
+      <div className="min-h-screen bg-gray-100 ">
+    <PageWrapper direction={direction}>
       <Loading />
-    </div>)
+    </PageWrapper>
+      </div>)
   }
 
   return (
+    <PageWrapper direction={direction}>
+
     <div className="mb-10 flex flex-col items-center min-h-3/4 py-2 px-4">
       <WelcomePage />
       <h1 className="-mt-20 text-4xl font-bold mb-4">Welcome to Spiritual Thoughts</h1>
@@ -54,5 +62,6 @@ export default function HomePage() {
         </>
       )}
     </div>
+    </PageWrapper>
   );
 }

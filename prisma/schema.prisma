@@ -32,6 +32,7 @@ model Message{
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
   receiverId Int
   createdAt DateTime  @default(now())
+  read  Boolean @default (false)
 }
 
 model Post {
