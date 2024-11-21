@@ -1,47 +1,60 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 
-export default function MessageInput({ senderId, receiverId, socket, onMessageSent}) {
-  const [text, setText] = useState('');
+let socket;
+
+export default function MessageInput({ senderId, receiverId, onMessageSent }) {
+  const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+
+  const roomId = `${Math.min(senderId, receiverId)}-${Math.max(senderId, receiverId)}`;
+
+  useEffect(() => {
+    // Connect to the Socket.IO server
+    socket = io("/", { path: "/api/socket" }); // Match the path used in server.js
+
+    // Join the chat room
+    socket.emit("joinRoom", { roomId });
+
+    return () => {
+      socket.disconnect(); // Clean up when component unmounts
+    };
+  }, [roomId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim() || sending) return;
-
     setSending(true);
-  const receiverIdInt = parseInt(receiverId);
-  const senderIdInt = parseInt(senderId);
-    console.log(text)
+
     try {
-      const response = await fetch('/api/messages/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch("/api/messages/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text,
-          senderIdInt,
-          receiverIdInt,
+          senderId: parseInt(senderId),
+          receiverId: parseInt(receiverId),
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to send message');
+      if (!response.ok) throw new Error("Failed to send message");
 
       const newMessage = await response.json();
-      socket.emit('newMessage', newMessage);
-      setText('');
+      socket.emit("newMessage", { roomId, message: newMessage });
+
+      setText("");
       onMessageSent();
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     } finally {
       setSending(false);
     }
   };
 
   const handleTyping = () => {
-    socket.emit('typing', { senderId, receiverId });
+    text!=="" && socket.emit("typing", { roomId, user: senderId });
   };
 
   return (
@@ -63,8 +76,8 @@ export default function MessageInput({ senderId, receiverId, socket, onMessageSe
           disabled={!text.trim() || sending}
           className={`px-4 py-2 rounded-lg ${
             !text.trim() || sending
-              ? 'bg-gray-300'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
+              ? "bg-gray-300"
+              : "bg-blue-500 text-white hover:bg-blue-600"
           }`}
         >
           Send

@@ -41,7 +41,7 @@ else{
       });
       
       if (res.ok) {
-        showNotification("Registration successful, welcome!", "success")
+        showNotification("Registration successful!", "success")
         router.push("/auth/signin");
       } else {
         showNotification('Registration was not successfull, please try again after a while. It\'s not you, it us!', 'failure', true)

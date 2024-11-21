@@ -5,11 +5,16 @@ import { initSocket } from '../../lib/socket';
 import MessageInput from './MessageInput';
 
 export default function ChatWindow({ senderId, receiverId }) {
+  console.log({ senderId, receiverId })
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
   const socket = useRef(null);
+
+  // setInterval(() => {
+  //   fetchMessages();
+  // }, 2000);
 
   const fetchMessages = async () => {
     try {
@@ -72,7 +77,7 @@ export default function ChatWindow({ senderId, receiverId }) {
               <div
                 key={message.id}
                 className={`text-black font-mono italic my-2 p-2 rounded-lg max-w-[70%] ${
-                  message.senderId !== senderId
+                  message.senderId === senderId
                     ? 'ml-auto bg-blue-500 text-white'
                     : 'bg-gray-200'
                 }`}

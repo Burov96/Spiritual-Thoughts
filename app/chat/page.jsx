@@ -8,6 +8,7 @@ import ChatWindow from "../components/ChatWindow";
 import { Loading } from "../components/Loading";
 import { useNavigation } from "../context/NavigationContext";
 import { PageWrapper } from "../components/PageWrapper";
+import Image from "next/image";
 
 
 export default function ChatPage() {
@@ -86,7 +87,9 @@ export default function ChatPage() {
               }`}
             >
               <div className="flex items-center space-x-3">
-                  <img
+                  <Image
+                  width={20}
+                  height={20}
                     src={user.profilePicture || "/images/user.png"}
                     alt={user.name}
                     className="w-10 h-10 rounded-full"
@@ -113,7 +116,7 @@ export default function ChatPage() {
       <div className="flex-1">
         {activeChat ? (
           <ChatWindow
-            senderId={session.user.id}
+            senderId={session.user.id*1}
             receiverId={activeChat}
           />
         ) : (
