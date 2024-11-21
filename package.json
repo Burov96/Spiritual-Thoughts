@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "vercel-build": "node vercel-build.mjs",
-    "dev": "node server.js",
+    "dev": "next dev",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "next lint"
@@ -21,9 +21,7 @@
     "next-auth": "^4.24.8",
     "randomcolor": "^0.6.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

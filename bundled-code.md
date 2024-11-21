@@ -675,7 +675,7 @@ export async function PUT(request) {
 ```js
 import { Server } from "socket.io";
 
-let io;
+let io; // Declare a global variable for Socket.IO instance
 
 export const config = {
   api: {
@@ -688,7 +688,14 @@ export async function GET(req, res) {
     console.log("Initializing Socket.IO...");
 
     // Attach Socket.IO to the server
-    io = new Server(res.socket.server);
+    io = new Server(res.socket.server, {
+      path: "/api/socket", // Ensure correct path for Socket.IO
+      cors: {
+        origin: "*", // Allow all origins (adjust this for production)
+        methods: ["GET", "POST"],
+      },
+    });
+
     res.socket.server.io = io;
 
     io.on("connection", (socket) => {
@@ -1960,7 +1967,9 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
 
   useEffect(() => {
     // Connect to the Socket.IO server
-    socket = io("/api/socket"); // Matches your API route path
+    socket = io("/", { path: "/api/socket" }); // Match the path used in server.js
+
+    // Join the chat room
     socket.emit("joinRoom", { roomId });
 
     return () => {
@@ -1999,7 +2008,7 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
   };
 
   const handleTyping = () => {
-    socket.emit("typing", { roomId, user: senderId });
+    text!=="" && socket.emit("typing", { roomId, user: senderId });
   };
 
   return (
