@@ -20,7 +20,6 @@ export default function ChatWindow({ senderId, receiverId }) {
         `/api/messages?senderId=${senderId}&receiverId=${receiverId}`
       );
       const data = await response.json();
-      console.log(data) 
       setMessages(data);
       setLoading(false);
       scrollToBottom();

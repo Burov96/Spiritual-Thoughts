@@ -1,5 +1,298 @@
 # Bundled Next.js Application Code
 
+## File: .eslintrc.json
+```json
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off"
+  }
+}
+
+```
+
+## File: bundler.js
+```js
+const fs = require('fs');
+const path = require('path');
+
+// Configuration
+const outputFile = 'bundled-code.md';
+const directoriesToInclude = ['.', 'app', 'lib', 'prisma', 'hooks', 'components']; // Added '.' for current directory
+const excludePatterns = ['**/node_modules/**', '**/public/**', '**/*.map', outputFile, 'package-lock.json']; // Added outputFile to prevent including itself
+
+// Helper function to check exclusion
+const isExcluded = (filePath) => {
+  return excludePatterns.some(pattern => {
+    const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'));
+    return regex.test(filePath);
+  });
+};
+
+// Initialize bundled code
+let bundledCode = '# Bundled Next.js Application Code\n\n';
+
+// Function to walk through directories and collect files
+const walkDir = (dir, callback) => {
+  fs.readdirSync(dir).forEach(file => {
+    const fullPath = path.join(dir, file);
+    const relPath = path.relative(__dirname, fullPath);
+    
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      walkDir(fullPath, callback);
+    } else if (['.js', '.jsx', '.ts', '.tsx', '.json', '.mjs', '.cjs'].includes(path.extname(file))) {
+      callback(fullPath, relPath);
+    }
+  });
+};
+
+// Process root directory files first
+const processRootFiles = () => {
+  fs.readdirSync(__dirname).forEach(file => {
+    const fullPath = path.join(__dirname, file);
+    const relPath = path.relative(__dirname, fullPath);
+    
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (!stat.isDirectory() && ['.js', '.jsx', '.ts', '.tsx', '.json', '.mjs', '.cjs'].includes(path.extname(file))) {
+      try {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        bundledCode += `## File: ${relPath}\n\`\`\`${path.extname(file).substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    }
+  });
+};
+
+// Process root files first
+processRootFiles();
+
+// Then process subdirectories
+directoriesToInclude.filter(dir => dir !== '.').forEach(dir => {
+  const dirPath = path.join(__dirname, dir);
+  if (fs.existsSync(dirPath)) {
+    walkDir(dirPath, (fullPath, relPath) => {
+      try {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        bundledCode += `## File: ${relPath}\n\`\`\`${path.extname(fullPath).substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    });
+  }
+});
+
+// Write to output file
+fs.writeFileSync(path.join(__dirname, outputFile), bundledCode, 'utf8');
+console.log(`Bundled code written to ${outputFile}`);
+
+```
+
+## File: db.json
+```json
+{
+    "posts":[]
+}
+```
+
+## File: next-env.d.ts
+```ts
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.
+
+```
+
+## File: next.config.mjs
+```mjs
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+productionBrowserSourceMaps: true,
+images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+
+```
+
+## File: package.json
+```json
+{
+  "name": "movies",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "vercel-build": "node vercel-build.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "NODE_ENV=production node server.js",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.7.0",
+    "@dotlottie/react-player": "^1.6.19",
+    "@next-auth/prisma-adapter": "^1.0.7",
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^2.4.3",
+    "framer-motion": "^11.11.11",
+    "mysql": "^2.18.1",
+    "next": "14.2.13",
+    "next-auth": "^4.24.8",
+    "randomcolor": "^0.6.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.13",
+    "postcss": "^8",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
+
+```
+
+## File: postcss.config.mjs
+```mjs
+/** @type {import('postcss-load-config').Config} */
+const config = {
+  plugins: {
+    tailwindcss: {},
+  },
+};
+
+export default config;
+
+```
+
+## File: tailwind.config.ts
+```ts
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        zeleno:"#00ddb3",
+        sinio:"#008cff"
+      },
+    },
+  },
+  plugins: [],
+};
+export default config;
+
+```
+
+## File: tsconfig.json
+```json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "noImplicitAny": false,
+    "ignoreDeprecations": "5.0",
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/api/posts/[id]/delete/route copy.js",
+    "app/components/UserOP.jsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+
+```
+
+## File: vercel-build.mjs
+```mjs
+import { execSync } from 'child_process';
+
+try {
+  console.log('Running Prisma generate...');
+  execSync('npx prisma generate', { stdio: 'inherit' });
+  
+  console.log('Running Prisma migrate deploy...');
+  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+  
+  console.log('Running Next.js build...');
+  execSync('next build', { stdio: 'inherit' });
+} catch (error) {
+  console.error('Build script failed:', error);
+  process.exit(1);
+}
+
+```
+
+## File: vercel.json
+```json
+{
+    "builds": [
+      {
+        "src": "package.json",
+        "use": "@vercel/next",
+        "config": {
+          "buildCommand": "npm run vercel-build"
+        }
+      }
+    ]
+  }
+  
+```
+
 ## File: app\api\auth\register\route.ts
 ```ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -158,32 +451,6 @@ export async function POST(req) {
     );
   }
 }
-
-```
-
-## File: app\api\messages\typing.js
-```js
-import { Server } from 'socket.io';
-
-export const config = {
-  api: { bodyParser: false },
-};
-
-const ioHandler = (res) => {
-  if (!res.socket.server.io) {
-    const io = new Server(res.socket.server);
-    res.socket.server.io = io;
-
-    io.on('connection', (socket) => {
-      socket.on('typing', ({ roomId, user }) => {
-        socket.to(roomId).emit('userTyping', user);
-      });
-    });
-  }
-  res.end();
-};
-
-export default ioHandler;
 
 ```
 
@@ -671,63 +938,6 @@ export async function PUT(request) {
 
 ```
 
-## File: app\api\socket\route.js
-```js
-import { Server } from "socket.io";
-
-let io; // Declare a global variable for Socket.IO instance
-
-export const config = {
-  api: {
-    bodyParser: false, // Disable body parsing for WebSocket connections
-  },
-};
-
-export async function GET(req, res) {
-  if (!res.socket.server.io) {
-    console.log("Initializing Socket.IO...");
-
-    // Attach Socket.IO to the server
-    io = new Server(res.socket.server, {
-      path: "/api/socket", // Ensure correct path for Socket.IO
-      cors: {
-        origin: "*", // Allow all origins (adjust this for production)
-        methods: ["GET", "POST"],
-      },
-    });
-
-    res.socket.server.io = io;
-
-    io.on("connection", (socket) => {
-      console.log("Client connected:", socket.id);
-
-      // Handle new messages
-      socket.on("newMessage", ({ roomId, message }) => {
-        socket.to(roomId).emit("receiveMessage", message);
-      });
-
-      // Handle typing indicator
-      socket.on("typing", ({ roomId, user }) => {
-        socket.to(roomId).emit("userTyping", user);
-      });
-
-      // Join a specific room
-      socket.on("joinRoom", ({ roomId }) => {
-        socket.join(roomId);
-        console.log(`User joined room: ${roomId}`);
-      });
-
-      socket.on("disconnect", () => {
-        console.log("Client disconnected:", socket.id);
-      });
-    });
-  }
-
-  res.end(); // End the response for GET requests
-}
-
-```
-
 ## File: app\api\upload-avatar\route.js
 ```js
 
@@ -819,6 +1029,33 @@ export async function GET() {
   const users = await prisma.user.findMany();
 
   return new Response(JSON.stringify(users), { status: 200 });
+}
+
+```
+
+## File: app\api\users\typing\route.js
+```js
+import { getServerSession } from "next-auth/next";
+import prisma from "../../../../lib/prisma";
+import { authOptions } from "../../../../lib/authOptions";
+
+export async function POST(req) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
+  }
+
+  try {
+    const { typing } = await req.json();
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: { typing },
+    });
+    return new Response(JSON.stringify({ message: "Typing status updated" }), { status: 200 });
+  } catch (error) {
+    console.error("Error updating typing status:", error);
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
+  }
 }
 
 ```
@@ -1391,16 +1628,14 @@ export default function Button({ children, onClick, className }) {
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
-import { initSocket } from '../../lib/socket';
 import MessageInput from './MessageInput';
 
 export default function ChatWindow({ senderId, receiverId }) {
   console.log({ senderId, receiverId })
   const [messages, setMessages] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
+  // const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
-  const socket = useRef(null);
 
   // setInterval(() => {
   //   fetchMessages();
@@ -1412,7 +1647,6 @@ export default function ChatWindow({ senderId, receiverId }) {
         `/api/messages?senderId=${senderId}&receiverId=${receiverId}`
       );
       const data = await response.json();
-      console.log(data) 
       setMessages(data);
       setLoading(false);
       scrollToBottom();
@@ -1423,34 +1657,26 @@ export default function ChatWindow({ senderId, receiverId }) {
   };
 
   useEffect(() => {
-    socket.current = initSocket();
-    fetchMessages();
-    socket.current.on('receiveMessage', handleNewMessage);
-    socket.current.on('userTyping', handleUserTyping);
-
-    return () => {
-      if (socket.current) {
-        socket.current.off('receiveMessage');
-        socket.current.off('userTyping');
-      }
-    };
+    setInterval(() => {
+      fetchMessages();
+    }, 2000);
   }, [senderId, receiverId]);
 
-  const handleNewMessage = (message) => {
-    if (
-      (message.senderId === senderId && message.receiverId === receiverId) ||
-      (message.senderId === receiverId && message.receiverId === senderId)
-    ) {
-      fetchMessages(); 
-    }
-  };
+  // const handleNewMessage = (message) => {
+  //   if (
+  //     (message.senderId === senderId && message.receiverId === receiverId) ||
+  //     (message.senderId === receiverId && message.receiverId === senderId)
+  //   ) {
+  //     fetchMessages(); 
+  //   }
+  // };
 
-  const handleUserTyping = (data) => {
-    if (data.senderId === receiverId) {
-      setIsTyping(true);
-      setTimeout(() => setIsTyping(false), 2000);
-    }
-  };
+  // const handleUserTyping = (data) => {
+  //   if (data.senderId === receiverId) {
+  //     setIsTyping(true);
+  //     setTimeout(() => setIsTyping(false), 2000);
+  //   }
+  // };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1479,13 +1705,12 @@ export default function ChatWindow({ senderId, receiverId }) {
           </>
         )}
       </div>
-      {isTyping && (
+      {/* {isTyping && (
         <div className="px-4 text-sm text-gray-500">User is typing... </div>
-      )}
+      )} */}
       <MessageInput
         senderId={senderId}
         receiverId={receiverId}
-        socket={socket.current}
         onMessageSent={fetchMessages} 
       />
     </div>
@@ -1954,28 +2179,45 @@ export default function MessageButton({ senderId, receiverId }) {
 ```jsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { io } from "socket.io-client";
-
-let socket;
+import { useEffect, useState } from "react";
 
 export default function MessageInput({ senderId, receiverId, onMessageSent }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
-
-  const roomId = `${Math.min(senderId, receiverId)}-${Math.max(senderId, receiverId)}`;
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    // Connect to the Socket.IO server
-    socket = io("/", { path: "/api/socket" }); // Match the path used in server.js
-
-    // Join the chat room
-    socket.emit("joinRoom", { roomId });
-
-    return () => {
-      socket.disconnect(); // Clean up when component unmounts
+    const updateTypingStatus = async (typing) => {
+      try {
+        await fetch("/api/users/typing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ typing }),
+        });
+      } catch (error) {
+        console.error("Failed to update typing status:", error);
+      }
     };
-  }, [roomId]);
+
+    if (text.trim().length > 0 && !isTyping) {
+      setIsTyping(true);
+      updateTypingStatus(true);
+    } else if (text.trim().length === 0 && isTyping) {
+      setIsTyping(false);
+      updateTypingStatus(false);
+    }
+    
+    // Cleanup when component unmounts or text changes
+    return () => {
+      if (isTyping) {
+        setIsTyping(false);
+        updateTypingStatus(false);
+      }
+    };
+  }, [text]);
+
+  
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -1996,9 +2238,9 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
       if (!response.ok) throw new Error("Failed to send message");
 
       const newMessage = await response.json();
-      socket.emit("newMessage", { roomId, message: newMessage });
-
+      setMessages((prev) => [...prev, newMessage]); // Optimistically update messages
       setText("");
+      setIsTyping(false); 
       onMessageSent();
     } catch (error) {
       console.error("Error sending message:", error);
@@ -2007,37 +2249,40 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
     }
   };
 
-  const handleTyping = () => {
-    text!=="" && socket.emit("typing", { roomId, user: senderId });
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="text-black p-4 border-t">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            handleTyping();
-          }}
-          placeholder="Type a message..."
-          className="flex-1 p-2 border rounded-lg"
-          disabled={sending}
-        />
-        <button
-          type="submit"
-          disabled={!text.trim() || sending}
-          className={`px-4 py-2 rounded-lg ${
-            !text.trim() || sending
-              ? "bg-gray-300"
-              : "bg-blue-500 text-white hover:bg-blue-600"
-          }`}
-        >
-          Send
-        </button>
-      </div>
-    </form>
+    <div>
+      {/* <div className="messages">
+        {messages.map((message, idx) => (
+          <p key={idx}>
+            <strong>{message.senderId === senderId ? "You" : "Them"}:</strong>{" "}
+            {message.content}
+          </p>
+        ))}
+      </div> */}
+      <form onSubmit={handleSubmit} className="text-black p-4 border-t">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 p-2 border rounded-lg"
+            disabled={sending}
+          />
+          <button
+            type="submit"
+            disabled={!text.trim() || sending}
+            className={`px-4 py-2 rounded-lg ${
+              !text.trim() || sending
+                ? "bg-gray-300"
+                : "bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+          >
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -4108,23 +4353,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export default prisma;
-
-```
-
-## File: lib\socket.js
-```js
-import { io } from 'socket.io-client';
-
-let socket;
-
-export const initSocket = () => {
-  if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', {
-      path: '/api/socket',
-    });
-  }
-  return socket;
-};
 
 ```
 

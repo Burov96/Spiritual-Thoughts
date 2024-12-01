@@ -1,11 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MessageInput({ senderId, receiverId, onMessageSent }) {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
+  useEffect(() => {
+    const updateTypingStatus = async (typing) => {
+      try {
+        await fetch("/api/users/typing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ typing }),
+        });
+      } catch (error) {
+        console.error("Failed to update typing status:", error);
+      }
+    };
+
+    if (text.trim().length > 0 && !isTyping) {
+      setIsTyping(true);
+      updateTypingStatus(true);
+    } else if (text.trim().length === 0 && isTyping) {
+      setIsTyping(false);
+      updateTypingStatus(false);
+    }
+    
+    // Cleanup when component unmounts or text changes
+    return () => {
+      if (isTyping) {
+        setIsTyping(false);
+        updateTypingStatus(false);
+      }
+    };
+  }, [text]);
 
   
 
@@ -31,6 +61,7 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
       const newMessage = await response.json();
       setMessages((prev) => [...prev, newMessage]); // Optimistically update messages
       setText("");
+      setIsTyping(false); 
       onMessageSent();
     } catch (error) {
       console.error("Error sending message:", error);

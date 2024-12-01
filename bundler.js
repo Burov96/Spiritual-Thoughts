@@ -1,12 +1,10 @@
-// bundle-code.js
-
 const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const outputFile = 'bundled-code.md'; // Use .md for better readability
-const directoriesToInclude = ['app', 'lib', 'prisma', 'hooks', 'components']; // Adjust as needed
-const excludePatterns = ['**/node_modules/**', '**/public/**', '**/*.map']; // Exclude node_modules, public, and sourcemaps
+const outputFile = 'bundled-code.md';
+const directoriesToInclude = ['.', 'app', 'lib', 'prisma', 'hooks', 'components']; // Added '.' for current directory
+const excludePatterns = ['**/node_modules/**', '**/public/**', '**/*.map', outputFile, 'package-lock.json']; // Added outputFile to prevent including itself
 
 // Helper function to check exclusion
 const isExcluded = (filePath) => {
@@ -36,8 +34,31 @@ const walkDir = (dir, callback) => {
   });
 };
 
-// Collect and concatenate files
-directoriesToInclude.forEach(dir => {
+// Process root directory files first
+const processRootFiles = () => {
+  fs.readdirSync(__dirname).forEach(file => {
+    const fullPath = path.join(__dirname, file);
+    const relPath = path.relative(__dirname, fullPath);
+    
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (!stat.isDirectory() && ['.js', '.jsx', '.ts', '.tsx', '.json', '.mjs', '.cjs'].includes(path.extname(file))) {
+      try {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        bundledCode += `## File: ${relPath}\n\`\`\`${path.extname(file).substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    }
+  });
+};
+
+// Process root files first
+processRootFiles();
+
+// Then process subdirectories
+directoriesToInclude.filter(dir => dir !== '.').forEach(dir => {
   const dirPath = path.join(__dirname, dir);
   if (fs.existsSync(dirPath)) {
     walkDir(dirPath, (fullPath, relPath) => {
