@@ -6,34 +6,29 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const senderId = parseInt(searchParams.get('senderId'));
-    const receiverId = parseInt(searchParams.get('receiverId'));
     
-    if (!senderId || !receiverId) {
-      return new Response(JSON.stringify({ error: "Both senderId and receiverId are required" }), {
+    if (!senderId) {
+      return new Response(JSON.stringify({ error: "senderId is required" }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const messages = await prisma.message.findMany({
+    const message = await prisma.message.findFirst({
       where: {
-        OR: [
-          { senderId, receiverId },
-          { senderId: receiverId, receiverId: senderId },
-        ],
+        senderId: senderId
       },
       orderBy: {
-        createdAt: 'asc',
-      },
-      take: 20,
+        createdAt: 'desc'
+      }
     });
-    
-    return new Response(JSON.stringify(messages), {
+
+    return new Response(JSON.stringify({ isTyping: Boolean(message?.isTyping) }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Failed to get typing status" }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

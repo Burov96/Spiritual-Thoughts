@@ -1,3 +1,168 @@
+# Project Structure
+
+``├───.env
+├───.eslintrc.json
+├───.git
+├───.gitignore
+├───.next
+├───.vscode
+│   └───launch.json
+├───README.md
+├───app
+│   ├───NotificationProvider old.jsx
+│   ├───NotificationProvider.tsx
+│   ├───_app.js
+│   ├───api
+│   │   ├───auth
+│   │   │   ├───[...nextauth]
+│   │   │   │   └───route.ts
+│   │   │   └───register
+│   │   │       └───route.ts
+│   │   ├───messages
+│   │   │   ├───mark-as-read
+│   │   │   │   └───route.js
+│   │   │   ├───route.js
+│   │   │   ├───send
+│   │   │   │   └───route.js
+│   │   │   ├───typing
+│   │   │   │   └───route.js
+│   │   │   └───users
+│   │   │       └───route.js
+│   │   ├───posts
+│   │   │   ├───[id]
+│   │   │   │   ├───delete
+│   │   │   │   │   └───route.js
+│   │   │   │   ├───index.js
+│   │   │   │   ├───influence
+│   │   │   │   │   └───route.js
+│   │   │   │   ├───influence.ts
+│   │   │   │   ├───like.js
+│   │   │   │   └───pray.js
+│   │   │   └───route.ts
+│   │   ├───profile
+│   │   │   └───route.js
+│   │   ├───socket
+│   │   ├───upload-avatar
+│   │   │   └───route.js
+│   │   ├───userOP
+│   │   │   └───[id]
+│   │   │       └───route.js
+│   │   └───users
+│   │       ├───[id]
+│   │       │   ├───follow
+│   │       │   │   └───route.js
+│   │       │   ├───influence
+│   │       │   │   └───route.js
+│   │       │   ├───like
+│   │       │   │   └───route.js
+│   │       │   ├───route.js
+│   │       │   └───unfollow
+│   │       │       └───route.js
+│   │       ├───interests
+│   │       │   └───route.js
+│   │       ├───route.js
+│   │       └───typing
+│   │           └───route.js
+│   ├───auth
+│   │   ├───register
+│   │   │   └───page.jsx
+│   │   └───signin
+│   │       └───page.jsx
+│   ├───chat
+│   │   └───page.jsx
+│   ├───components
+│   │   ├───AvatarUpload.jsx
+│   │   ├───Avatars.jsx
+│   │   ├───Button.jsx
+│   │   ├───ChatWindow old.jsx
+│   │   ├───ChatWindow.jsx
+│   │   ├───FeedIcon.tsx
+│   │   ├───FetchUsers.jsx
+│   │   ├───FollowButton.jsx
+│   │   ├───Footer.jsx
+│   │   ├───Hamburger.tsx
+│   │   ├───Interests.jsx
+│   │   ├───InterestsList.jsx
+│   │   ├───Like.tsx
+│   │   ├───Loading.tsx
+│   │   ├───LogOutIcon.tsx
+│   │   ├───MessageButton.jsx
+│   │   ├───MessageInput.jsx
+│   │   ├───MessagesIcon.tsx
+│   │   ├───NavBar.jsx
+│   │   ├───Notification.module.css
+│   │   ├───Notification.tsx
+│   │   ├───PageWrapper.jsx
+│   │   ├───Post.tsx
+│   │   ├───PostForm.jsx
+│   │   ├───ProfileForm.jsx
+│   │   ├───ProfileIcon.tsx
+│   │   ├───RegisterForm.jsx
+│   │   ├───SessionProviderWrapper.tsx
+│   │   ├───Thrash.tsx
+│   │   ├───TypingIndicator.jsx
+│   │   ├───UserOP.jsx
+│   │   └───WelcomePage.tsx
+│   ├───context
+│   │   ├───NavigationContext.tsx
+│   │   └───NotificationContext.tsx
+│   ├───favicon.ico
+│   ├───feed
+│   │   └───page.jsx
+│   ├───globals.css
+│   ├───hooks
+│   │   ├───useNotification.js
+│   │   └───usePosts.ts
+│   ├───layout.tsx
+│   ├───notificationTypes.ts
+│   ├───page.tsx
+│   ├───profile
+│   │   ├───[id]
+│   │   │   └───page.jsx
+│   │   └───page.jsx
+│   ├───protected
+│   │   └───page.jsx
+│   └───utils
+│       └───outsideClidkFunctionRuner.js
+├───bun.lockb
+├───db.json
+├───lib
+│   ├───authOptions.ts
+│   ├───generateUserColors.ts
+│   └───prisma.ts
+├───next-env.d.ts
+├───next.config.mjs
+├───package.json
+├───postcss.config.mjs
+├───prisma
+│   ├───migrations
+│   │   ├───20240926200258_init
+│   │   │   └───migration.sql
+│   │   ├───20240927131138_social_thoughts
+│   │   │   └───migration.sql
+│   │   ├───20241009162453_add_profile_fields
+│   │   │   └───migration.sql
+│   │   ├───20241011105850_update_profile_picture_length
+│   │   │   └───migration.sql
+│   │   ├───20241013115511_social_thoughts
+│   │   │   └───migration.sql
+│   │   ├───20241017170357_add_user_color
+│   │   │   └───migration.sql
+│   │   ├───20241104181916_add_message_model
+│   │   │   └───migration.sql
+│   │   ├───20241121191807_add_typing_field
+│   │   │   └───migration.sql
+│   │   └───migration_lock.toml
+│   ├───schema.prisma
+│   └───test.js
+├───public
+├───tailwind.config.ts
+├───test1.sql
+├───tsconfig.json
+├───vercel-build.mjs
+└───vercel.json
+```
+
 # Bundled Next.js Application Code
 
 ## File: .eslintrc.json
@@ -8,88 +173,6 @@
     "@typescript-eslint/no-explicit-any": "off"
   }
 }
-
-```
-
-## File: bundler.js
-```js
-const fs = require('fs');
-const path = require('path');
-
-// Configuration
-const outputFile = 'bundled-code.md';
-const directoriesToInclude = ['.', 'app', 'lib', 'prisma', 'hooks', 'components']; // Added '.' for current directory
-const excludePatterns = ['**/node_modules/**', '**/public/**', '**/*.map', outputFile, 'package-lock.json']; // Added outputFile to prevent including itself
-
-// Helper function to check exclusion
-const isExcluded = (filePath) => {
-  return excludePatterns.some(pattern => {
-    const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'));
-    return regex.test(filePath);
-  });
-};
-
-// Initialize bundled code
-let bundledCode = '# Bundled Next.js Application Code\n\n';
-
-// Function to walk through directories and collect files
-const walkDir = (dir, callback) => {
-  fs.readdirSync(dir).forEach(file => {
-    const fullPath = path.join(dir, file);
-    const relPath = path.relative(__dirname, fullPath);
-    
-    if (isExcluded(relPath)) return;
-
-    const stat = fs.statSync(fullPath);
-    if (stat.isDirectory()) {
-      walkDir(fullPath, callback);
-    } else if (['.js', '.jsx', '.ts', '.tsx', '.json', '.mjs', '.cjs'].includes(path.extname(file))) {
-      callback(fullPath, relPath);
-    }
-  });
-};
-
-// Process root directory files first
-const processRootFiles = () => {
-  fs.readdirSync(__dirname).forEach(file => {
-    const fullPath = path.join(__dirname, file);
-    const relPath = path.relative(__dirname, fullPath);
-    
-    if (isExcluded(relPath)) return;
-
-    const stat = fs.statSync(fullPath);
-    if (!stat.isDirectory() && ['.js', '.jsx', '.ts', '.tsx', '.json', '.mjs', '.cjs'].includes(path.extname(file))) {
-      try {
-        const content = fs.readFileSync(fullPath, 'utf8');
-        bundledCode += `## File: ${relPath}\n\`\`\`${path.extname(file).substring(1)}\n${content}\n\`\`\`\n\n`;
-      } catch (err) {
-        console.error(`Error reading file ${fullPath}: ${err}`);
-      }
-    }
-  });
-};
-
-// Process root files first
-processRootFiles();
-
-// Then process subdirectories
-directoriesToInclude.filter(dir => dir !== '.').forEach(dir => {
-  const dirPath = path.join(__dirname, dir);
-  if (fs.existsSync(dirPath)) {
-    walkDir(dirPath, (fullPath, relPath) => {
-      try {
-        const content = fs.readFileSync(fullPath, 'utf8');
-        bundledCode += `## File: ${relPath}\n\`\`\`${path.extname(fullPath).substring(1)}\n${content}\n\`\`\`\n\n`;
-      } catch (err) {
-        console.error(`Error reading file ${fullPath}: ${err}`);
-      }
-    });
-  }
-});
-
-// Write to output file
-fs.writeFileSync(path.join(__dirname, outputFile), bundledCode, 'utf8');
-console.log(`Bundled code written to ${outputFile}`);
 
 ```
 
@@ -150,8 +233,10 @@ export default nextConfig;
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "framer-motion": "^11.11.11",
+    "mariadb": "^3.4.0",
     "mysql": "^2.18.1",
-    "next": "14.2.13",
+    "mysqldump": "^3.2.0",
+    "next": "^15.0.3",
     "next-auth": "^4.24.8",
     "randomcolor": "^0.6.2",
     "react": "^18.2.0",
@@ -249,7 +334,7 @@ export default config;
     ".next/types/**/*.ts",
     "app/api/posts/[id]/delete/route copy.js",
     "app/components/UserOP.jsx"
-  ],
+, "app/api/messages/typing/route.js", "app/api/users/typing/route.js"  ],
   "exclude": [
     "node_modules"
   ]
@@ -396,6 +481,13 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const senderId = parseInt(searchParams.get('senderId'));
     const receiverId = parseInt(searchParams.get('receiverId'));
+    
+    if (!senderId || !receiverId) {
+      return new Response(JSON.stringify({ error: "Both senderId and receiverId are required" }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const messages = await prisma.message.findMany({
       where: {
@@ -409,7 +501,7 @@ export async function GET(req) {
       },
       take: 20,
     });
-
+    
     return new Response(JSON.stringify(messages), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -454,9 +546,48 @@ export async function POST(req) {
 
 ```
 
+## File: app\api\messages\typing\route.js
+```js
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const senderId = parseInt(searchParams.get('senderId'));
+    
+    if (!senderId) {
+      return new Response(JSON.stringify({ error: "senderId is required" }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const message = await prisma.message.findFirst({
+      where: {
+        senderId: senderId
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return new Response(JSON.stringify({ isTyping: Boolean(message?.isTyping) }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Failed to get typing status" }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+}
+```
+
 ## File: app\api\messages\users\route.js
 ```js
-// app/api/messages/users/route.js
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -478,6 +609,7 @@ export async function GET(req) {
         u.id,
         u.name,
         u.profilePicture,
+        u.color,
         CAST((
           SELECT COUNT(*)
           FROM Message m2
@@ -596,7 +728,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; 
+  const { id } = await params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -970,7 +1102,7 @@ import prisma from "../../../../lib/prisma";
 
 
 export async function GET(request, {params}) { 
-const {id} = params
+const {id} = await params
   try {
       const user = await prisma.user.findUnique({
         where: { id: id*1 },
@@ -1057,7 +1189,6 @@ export async function POST(req) {
     return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }
-
 ```
 
 ## File: app\api\users\[id]\follow\route.js
@@ -1068,7 +1199,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; 
+  const { id } = await params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -1097,7 +1228,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params;
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -1157,7 +1288,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; 
+  const { id } = await params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -1199,7 +1330,7 @@ export async function POST(request, { params }) {
 import prisma from "../../../../lib/prisma";
 
 export async function GET(request, { params }) {
-  const { id } = params;
+  const { id } = await params;
   const user = await prisma.user.findUnique({
     where: { id: parseInt(id) },
     select: {
@@ -1229,7 +1360,7 @@ import prisma from "../../../../../lib/prisma";
 import { authOptions } from "../../../../../lib/authOptions";
 
 export async function POST(request, { params }) {
-  const { id } = params; 
+  const { id } = await params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -1459,6 +1590,8 @@ export default function ChatPage() {
       try {
         const response = await fetch(`/api/messages/users?userId=${session?.user?.id}`);
         const data = await response.json();
+        console.log(session?.user + "'s data is:")
+        console.log(data)
         setChatUsers(data);
         setLoading(false);
       } catch (error) {
@@ -1507,11 +1640,11 @@ export default function ChatPage() {
             <div
               key={user.id}
               onClick={() => handleChatSelect(user.id)}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
+              className={`p-3 rounded-lg cursor-pointer transition-all border-2  duration-200 ${
                 activeChat === user.id
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-opacity-20 hover:bg-gray-500"
-              }`}
+                  ? "bg-blue-500 text-white border-4 hover:bg-blue-400"
+                  : "hover:bg-opacity-20 hover:bg-gray-500 hover:border-[3px] hover:p-[0.68rem]"
+              }`} style={{borderColor:user.color}}
             >
               <div className="flex items-center space-x-3">
                   <Image
@@ -1623,7 +1756,7 @@ export default function Button({ children, onClick, className }) {
   
 ```
 
-## File: app\components\ChatWindow.jsx
+## File: app\components\ChatWindow old.jsx
 ```jsx
 "use client";
 
@@ -1647,6 +1780,7 @@ export default function ChatWindow({ senderId, receiverId }) {
         `/api/messages?senderId=${senderId}&receiverId=${receiverId}`
       );
       const data = await response.json();
+      console.log(data)
       setMessages(data);
       setLoading(false);
       scrollToBottom();
@@ -1712,6 +1846,130 @@ export default function ChatWindow({ senderId, receiverId }) {
         senderId={senderId}
         receiverId={receiverId}
         onMessageSent={fetchMessages} 
+      />
+    </div>
+  );
+}
+
+```
+
+## File: app\components\ChatWindow.jsx
+```jsx
+"use client";
+
+import { useEffect, useState, useRef, useCallback, memo } from 'react';
+import MessageInput from './MessageInput';
+
+const MessageItem = memo(({ message, isSender }) => (
+  <div
+    className={`text-black font-mono italic my-2 p-2 rounded-lg max-w-[70%] ${
+      isSender 
+        ? 'ml-auto bg-blue-500 text-white' 
+        : 'bg-gray-200'
+    }`}
+  >
+    {message.content}
+    <div className="text-xs opacity-50">
+      {new Date(message.createdAt).toLocaleTimeString()}
+    </div>
+  </div>
+), (prev, next) => 
+  prev.message.id === next.message.id && 
+  prev.isSender === next.isSender
+);
+
+
+export default function ChatWindow({ senderId, receiverId }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+  const prevMessagesRef = useRef([]);
+
+  const fetchMessages = useCallback(async () => {
+    try {
+      const messagesResponse = await fetch(
+        `/api/messages?senderId=${senderId}&receiverId=${receiverId}`
+      );
+      
+      if (!messagesResponse.ok) {
+        console.error('Messages response status:', messagesResponse.status);
+        return;
+      }
+  
+      const messagesData = await messagesResponse.json();
+      setMessages(messagesData);
+      
+      if (prevMessagesRef.current.length !== messagesData.length) {
+        scrollToBottom();
+      }
+      prevMessagesRef.current = messagesData;
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [senderId, receiverId]);
+  
+  
+  const checkTypingStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/messages/typing?senderId=${receiverId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsOtherUserTyping(data.isTyping);
+      }
+    } catch (error) {
+      console.error('Failed to check typing status:', error);
+    }
+  }, [receiverId]);
+  
+  
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+  
+
+  useEffect(() => {
+    fetchMessages();
+    const messageInterval = setInterval(fetchMessages, 20000);
+    const typingInterval = setInterval(checkTypingStatus, 10000);
+    
+    return () => {
+      clearInterval(messageInterval);
+      clearInterval(typingInterval);
+    };
+  }, [fetchMessages, checkTypingStatus]);
+  
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-4">
+        {loading ? (
+          <div>Loading messages...</div>
+        ) : (
+          <>
+            {messages.map((message) => (
+              <MessageItem
+                key={message.id}
+                message={message}
+                isSender={message.senderId === senderId}
+              />
+            ))}
+            {isOtherUserTyping && (
+              <div className="text-gray-500 text-sm italic">
+                User is typing...
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </>
+        )}
+      </div>
+      <MessageInput
+        senderId={senderId}
+        receiverId={receiverId}
+        onMessageSent={fetchMessages}
       />
     </div>
   );
@@ -2187,34 +2445,30 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    const updateTypingStatus = async (typing) => {
+    const updateTypingStatus = async (isTyping) => {
       try {
         await fetch("/api/users/typing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ typing }),
+          body: JSON.stringify({ 
+            typing: isTyping,
+            senderId,
+            receiverId 
+          }),
         });
       } catch (error) {
         console.error("Failed to update typing status:", error);
       }
     };
-
-    if (text.trim().length > 0 && !isTyping) {
-      setIsTyping(true);
-      updateTypingStatus(true);
-    } else if (text.trim().length === 0 && isTyping) {
-      setIsTyping(false);
-      updateTypingStatus(false);
+  
+    const hasText = text.trim().length > 0;
+    if (hasText !== isTyping) {
+      setIsTyping(hasText);
+      updateTypingStatus(hasText);
     }
-    
-    // Cleanup when component unmounts or text changes
-    return () => {
-      if (isTyping) {
-        setIsTyping(false);
-        updateTypingStatus(false);
-      }
-    };
-  }, [text]);
+  }, [text, isTyping, senderId, receiverId]);
+  
+  
 
   
 
@@ -2238,7 +2492,6 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
       if (!response.ok) throw new Error("Failed to send message");
 
       const newMessage = await response.json();
-      setMessages((prev) => [...prev, newMessage]); // Optimistically update messages
       setText("");
       setIsTyping(false); 
       onMessageSent();
@@ -2251,14 +2504,6 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
 
   return (
     <div>
-      {/* <div className="messages">
-        {messages.map((message, idx) => (
-          <p key={idx}>
-            <strong>{message.senderId === senderId ? "You" : "Them"}:</strong>{" "}
-            {message.content}
-          </p>
-        ))}
-      </div> */}
       <form onSubmit={handleSubmit} className="text-black p-4 border-t">
         <div className="flex gap-2">
           <input
@@ -3116,7 +3361,7 @@ export default function UserOP({ id }) {
     (
   userData &&
       <div className=" flex italic m-2 p-1">
-      <Image src={userData.profilePicture ||"/images/user.png" || "https://i.ibb.co/Qv0nQSg/user.png"} width={32} height={32}/>
+      <Image src={userData.profilePicture ||"/images/user.png" || "https://i.ibb.co/Qv0nQSg/user.png"} width={32} height={32} alt="profile picture"/>
       <div className="transition-all duration-500 font-semibold capitalize mx-1 font-mono" style={{ color: color }}>
       {userData.name} 
       </div>
@@ -4087,8 +4332,8 @@ import { randomColor } from "randomcolor";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
-export default function Profile({ params }) {
-  const id = params.id;
+export default async function Profile({ params }) {
+  const id = await params.id;
   const [user, setUser] = useState(null);
   const [outlineColor, setOutlineColor] = useState("");
   const { data: session } = useSession();

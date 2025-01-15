@@ -8,8 +8,8 @@ import { randomColor } from "randomcolor";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
-export default function Profile({ params }) {
-  const id = params.id;
+export default async function Profile({ params }) {
+  const id = await params.id;
   const [user, setUser] = useState(null);
   const [outlineColor, setOutlineColor] = useState("");
   const { data: session } = useSession();

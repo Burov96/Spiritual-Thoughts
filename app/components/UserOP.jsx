@@ -48,7 +48,7 @@ export default function UserOP({ id }) {
     (
   userData &&
       <div className=" flex italic m-2 p-1">
-      <Image src={userData.profilePicture ||"/images/user.png" || "https://i.ibb.co/Qv0nQSg/user.png"} width={32} height={32}/>
+      <Image src={userData.profilePicture ||"/images/user.png" || "https://i.ibb.co/Qv0nQSg/user.png"} width={32} height={32} alt="profile picture"/>
       <div className="transition-all duration-500 font-semibold capitalize mx-1 font-mono" style={{ color: color }}>
       {userData.name} 
       </div>

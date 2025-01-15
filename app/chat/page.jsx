@@ -32,6 +32,8 @@ export default function ChatPage() {
       try {
         const response = await fetch(`/api/messages/users?userId=${session?.user?.id}`);
         const data = await response.json();
+        console.log(session?.user + "'s data is:")
+        console.log(data)
         setChatUsers(data);
         setLoading(false);
       } catch (error) {
@@ -80,11 +82,11 @@ export default function ChatPage() {
             <div
               key={user.id}
               onClick={() => handleChatSelect(user.id)}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
+              className={`p-3 rounded-lg cursor-pointer transition-all border-2  duration-200 ${
                 activeChat === user.id
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-opacity-20 hover:bg-gray-500"
-              }`}
+                  ? "bg-blue-500 text-white border-4 hover:bg-blue-400"
+                  : "hover:bg-opacity-20 hover:bg-gray-500 hover:border-[3px] hover:p-[0.68rem]"
+              }`} style={{borderColor:user.color}}
             >
               <div className="flex items-center space-x-3">
                   <Image

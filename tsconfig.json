@@ -33,7 +33,7 @@
     ".next/types/**/*.ts",
     "app/api/posts/[id]/delete/route copy.js",
     "app/components/UserOP.jsx"
-  ],
+, "app/api/messages/typing/route.js", "app/api/users/typing/route.js"  ],
   "exclude": [
     "node_modules"
   ]

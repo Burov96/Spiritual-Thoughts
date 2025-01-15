@@ -8,34 +8,30 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    const updateTypingStatus = async (typing) => {
+    const updateTypingStatus = async (isTyping) => {
       try {
         await fetch("/api/users/typing", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ typing }),
+          body: JSON.stringify({ 
+            typing: isTyping,
+            senderId,
+            receiverId 
+          }),
         });
       } catch (error) {
         console.error("Failed to update typing status:", error);
       }
     };
-
-    if (text.trim().length > 0 && !isTyping) {
-      setIsTyping(true);
-      updateTypingStatus(true);
-    } else if (text.trim().length === 0 && isTyping) {
-      setIsTyping(false);
-      updateTypingStatus(false);
+  
+    const hasText = text.trim().length > 0;
+    if (hasText !== isTyping) {
+      setIsTyping(hasText);
+      updateTypingStatus(hasText);
     }
-    
-    // Cleanup when component unmounts or text changes
-    return () => {
-      if (isTyping) {
-        setIsTyping(false);
-        updateTypingStatus(false);
-      }
-    };
-  }, [text]);
+  }, [text, isTyping, senderId, receiverId]);
+  
+  
 
   
 
@@ -59,7 +55,6 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
       if (!response.ok) throw new Error("Failed to send message");
 
       const newMessage = await response.json();
-      setMessages((prev) => [...prev, newMessage]); // Optimistically update messages
       setText("");
       setIsTyping(false); 
       onMessageSent();
@@ -72,14 +67,6 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
 
   return (
     <div>
-      {/* <div className="messages">
-        {messages.map((message, idx) => (
-          <p key={idx}>
-            <strong>{message.senderId === senderId ? "You" : "Them"}:</strong>{" "}
-            {message.content}
-          </p>
-        ))}
-      </div> */}
       <form onSubmit={handleSubmit} className="text-black p-4 border-t">
         <div className="flex gap-2">
           <input

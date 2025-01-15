@@ -1,4 +1,3 @@
-// app/api/messages/users/route.js
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -20,6 +19,7 @@ export async function GET(req) {
         u.id,
         u.name,
         u.profilePicture,
+        u.color,
         CAST((
           SELECT COUNT(*)
           FROM Message m2
