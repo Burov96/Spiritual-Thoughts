@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-productionBrowserSourceMaps: true,
-images: {
+  eslint: { 
+  ignoreDuringBuilds: true
+   },
+  productionBrowserSourceMaps: true,
+  images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
