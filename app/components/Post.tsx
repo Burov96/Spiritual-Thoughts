@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Like from "./Like";
-import { revalidatePath } from "next/cache";
+import { useRouter } from "next/navigation";
 import { useNotification } from "../NotificationProvider";
 import UserOP from "../components/UserOP"
 import Link from "next/link";
@@ -38,6 +38,7 @@ interface PostProps {
 
 export  function Post({ post }: PostProps) {
   const { data: session } = useSession();
+  const router = useRouter();
 const [userInfluenced, setUserInfluenced] = useState(() => {
     return post.influences?.some((influence) => influence.user.email === session?.user?.email) || false;
   });
@@ -99,7 +100,7 @@ setUserInfluenced(wasInfluenced);
       const data = await response.json();
       if (response.ok && data.message === "Post deleted successfully") {
           showNotification("Successfully deleted the post!", "success");
-          revalidatePath("/feed");
+          router.refresh();
       } else {
         showNotification(data.message || "Something went wrong.", "failure");
       }
