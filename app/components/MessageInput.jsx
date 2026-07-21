@@ -35,7 +35,6 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
 
   
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim() || sending) return;

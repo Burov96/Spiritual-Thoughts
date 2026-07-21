@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Like from "./Like";
 import { revalidatePath } from "next/cache";
@@ -38,16 +38,31 @@ interface PostProps {
 
 export  function Post({ post }: PostProps) {
   const { data: session } = useSession();
-  const [influenced, setInfluenced] = useState(post.influences.length || 0);
-  const [userInfluenced, setUserInfluenced] = useState(
-    post.influences.some((influence) => influence.user.email === session?.user?.email)  );
+const [userInfluenced, setUserInfluenced] = useState(() => {
+    return post.influences?.some((influence) => influence.user.email === session?.user?.email) || false;
+  });
+  const [influenced, setInfluenced] = useState(post.influences?.length || 0);
   const { showNotification } = useNotification();
-const isAuthor = session?.user?.email === post.author.email;
+  const isAuthor = session?.user?.email === post.author.email;
+
+  // useEffect(() => {
+  //   if (session?.user?.email && post.influences) {
+  //     const isLiked = post.influences.some(
+  //       (influence) => influence.user.email === session.user.email
+  //     );
+  //     setUserInfluenced(isLiked);
+  //     setInfluenced(post.influences.length);
+  //   }
+  // }, [session?.user?.email, post.influences]);
+
   const handleInfluence = async () => {
     if (!session) {
       showNotification("First login in order to interact with posts.", "failure");
       return;
     }
+    const wasInfluenced = userInfluenced;
+    setUserInfluenced(!wasInfluenced);
+    setInfluenced((prev) => (wasInfluenced ? prev - 1 : prev + 1));
 
     try {
       const response = await fetch(`/api/posts/${post.id}/influence`, {
@@ -56,21 +71,22 @@ const isAuthor = session?.user?.email === post.author.email;
         body: JSON.stringify({ type: "feel" }),
       });
       const data = await response.json();
-      if (response.ok) {
+if (response.ok) {
         if (data.message === "Post liked") {
-          setInfluenced((prev) => prev + 1);
-          setUserInfluenced(true);
           showNotification("Successfully liked the post!", "success");
         } else if (data.message === "Post unliked") {
-          setInfluenced((prev) => prev - 1);
-          setUserInfluenced(false);
           showNotification("Successfully unliked the post.", "success");
         }
       } else {
+setUserInfluenced(wasInfluenced);
+        setInfluenced((prev) => (wasInfluenced ? prev + 1 : prev - 1));
         showNotification(data.message || "Something went wrong.", "failure");
       }
     } catch (error) {
-      console.log(error)
+setUserInfluenced(wasInfluenced);
+      setInfluenced((prev) => (wasInfluenced ? prev + 1 : prev - 1));
+      showNotification("Network error. Please try again.", "failure");
+      console.log(error);
     }
   };
   const handleDelete = async () => {

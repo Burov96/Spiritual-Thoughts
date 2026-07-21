@@ -1,3 +1,5 @@
+import { useTheme } from '../context/ThemeContext';
+
 const fs = require("fs");
 const path = require("path");
 const minimatch = require("minimatch");
@@ -90,6 +92,7 @@ const walkDir = (dir, callback) => {
 
 // Process top-level files in the current directory
 const processRootFiles = () => {
+  const { colors } = useTheme();
   fs.readdirSync(__dirname).forEach((file) => {
     const fullPath = path.join(__dirname, file);
     const relPath = path.relative(__dirname, fullPath);

@@ -1,4 +1,5 @@
 "use client";
+import { useTheme } from '../../../context/ThemeContext';
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -10,7 +11,6 @@ import { useNavigation } from "../context/NavigationContext";
 import { PageWrapper } from "../components/PageWrapper";
 import Image from "next/image";
 
-
 export default function ChatPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -19,7 +19,6 @@ export default function ChatPage() {
   const [chatUsers, setChatUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { direction } = useNavigation();
-
 
   useEffect(() => {
     if (status === "unauthenticated") {

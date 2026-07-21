@@ -126,6 +126,8 @@
 │   └───utils
 │       └───outsideClidkFunctionRuner.js
 ├───bun.lockb
+├───bundler.cjs
+├───bundlerCopy.js
 ├───db.json
 ├───lib
 │   ├───authOptions.ts
@@ -177,6 +179,303 @@
 
 ```
 
+## File: bundler.cjs
+```cjs
+const fs = require("fs");
+const path = require("path");
+const minimatch = require("minimatch");
+
+// Configuration
+const outputFile = "bundled-code.md";
+const directoriesToInclude = [
+  ".",
+  "app",
+  "lib",
+  "prisma",
+  "hooks",
+  "components",
+  "src",
+  "scripts",
+  "services",
+  "navigation",
+  "screens",
+  "utils",
+  "auth",
+  "constants",
+  "api",
+];
+const excludePatterns = [
+  "**/node_modules/**",
+  "**/public/**",
+  "**/*.map",
+  outputFile,
+  "package-lock.json",
+  "**/.next/**",
+  "**/.git/**",
+  'bundler.js',
+  'node_modules',
+];
+
+// Helper function to check exclusion with minimatch
+const isExcluded = (filePath) => {
+  // Convert backslashes to forward slashes for consistent matching
+  const normalizedPath = filePath.split(path.sep).join("/");
+  return excludePatterns.some((pattern) => minimatch(normalizedPath, pattern));
+};
+
+// Generate file tree
+const generateFileTree = (dir, prefix = "") => {
+  // If the directory itself is excluded, return immediately
+  const relDir = path.relative(__dirname, dir);
+  if (isExcluded(relDir)) return "";
+
+  let treeOutput = "";
+  const items = fs.readdirSync(dir).sort();
+
+  items.forEach((item, index) => {
+    const fullPath = path.join(dir, item);
+    const relPath = path.relative(__dirname, fullPath);
+
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    const isLast = index === items.length - 1;
+    const connector = isLast ? "└───" : "├───";
+
+    treeOutput += `${prefix}${connector}${item}\n`;
+
+    if (stat.isDirectory()) {
+      const newPrefix = prefix + (isLast ? "    " : "│   ");
+      treeOutput += generateFileTree(fullPath, newPrefix);
+    }
+  });
+
+  return treeOutput;
+};
+
+// Initialize bundled code with file tree
+let bundledCode = "# Project Structure\n\n``"
+bundledCode += generateFileTree(".");
+bundledCode += "```\n\n# Bundled Next.js Application Code\n\n";
+
+// Function to walk directories and collect files
+const walkDir = (dir, callback) => {
+  fs.readdirSync(dir).forEach((file) => {
+    const fullPath = path.join(dir, file);
+    const relPath = path.relative(__dirname, fullPath);
+
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      walkDir(fullPath, callback);
+    } else if (
+      [".js", ".jsx", ".ts", ".tsx", ".json", ".mjs", ".cjs"].includes(
+        path.extname(file)
+      )
+    ) {
+      callback(fullPath, relPath);
+    }
+  });
+};
+
+// Process top-level files in the current directory
+const processRootFiles = () => {
+  fs.readdirSync(__dirname).forEach((file) => {
+    const fullPath = path.join(__dirname, file);
+    const relPath = path.relative(__dirname, fullPath);
+
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (
+      !stat.isDirectory() &&
+      [".js", ".jsx", ".ts", ".tsx", ".json", ".mjs", ".cjs"].includes(
+        path.extname(file)
+      )
+    ) {
+      try {
+        const content = fs.readFileSync(fullPath, "utf8");
+        bundledCode += `## File: ${relPath}\n\`\`\`${path
+          .extname(file)
+          .substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    }
+  });
+};
+
+// Collect code
+processRootFiles();
+directoriesToInclude.filter((dir) => dir !== ".").forEach((dir) => {
+  const dirPath = path.join(__dirname, dir);
+  if (fs.existsSync(dirPath)) {
+    walkDir(dirPath, (fullPath, relPath) => {
+      try {
+        const content = fs.readFileSync(fullPath, "utf8");
+        bundledCode += `## File: ${relPath}\n\`\`\`${path
+          .extname(fullPath)
+          .substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    });
+  }
+});
+
+// Write to output file
+fs.writeFileSync(path.join(__dirname, outputFile), bundledCode, "utf8");
+console.log(`Bundled code written to ${outputFile} to "${__dirname}"`);
+
+```
+
+## File: bundlerCopy.js
+```js
+import { useTheme } from '../context/ThemeContext';
+
+const fs = require("fs");
+const path = require("path");
+const minimatch = require("minimatch");
+
+// Configuration
+const outputFile = "bundled-code.md";
+const directoriesToInclude = [
+  ".",
+  "app",
+  "lib",
+  "prisma",
+  "hooks",
+  "components",
+  "src",
+];
+const excludePatterns = [
+  "**/node_modules/**",
+  "**/public/**",
+  "**/*.map",
+  outputFile,
+  "package-lock.json",
+  "**/.next/**",
+  "**/.git/**",
+  'bundler.js',
+  'node_modules',
+];
+
+// Helper function to check exclusion with minimatch
+const isExcluded = (filePath) => {
+  // Convert backslashes to forward slashes for consistent matching
+  const normalizedPath = filePath.split(path.sep).join("/");
+  return excludePatterns.some((pattern) => minimatch(normalizedPath, pattern));
+};
+
+// Generate file tree
+const generateFileTree = (dir, prefix = "") => {
+  // If the directory itself is excluded, return immediately
+  const relDir = path.relative(__dirname, dir);
+  if (isExcluded(relDir)) return "";
+
+  let treeOutput = "";
+  const items = fs.readdirSync(dir).sort();
+
+  items.forEach((item, index) => {
+    const fullPath = path.join(dir, item);
+    const relPath = path.relative(__dirname, fullPath);
+
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    const isLast = index === items.length - 1;
+    const connector = isLast ? "└───" : "├───";
+
+    treeOutput += `${prefix}${connector}${item}\n`;
+
+    if (stat.isDirectory()) {
+      const newPrefix = prefix + (isLast ? "    " : "│   ");
+      treeOutput += generateFileTree(fullPath, newPrefix);
+    }
+  });
+
+  return treeOutput;
+};
+
+// Initialize bundled code with file tree
+let bundledCode = "# Project Structure\n\n``"
+bundledCode += generateFileTree(".");
+bundledCode += "```\n\n# Bundled Next.js Application Code\n\n";
+
+// Function to walk directories and collect files
+const walkDir = (dir, callback) => {
+  fs.readdirSync(dir).forEach((file) => {
+    const fullPath = path.join(dir, file);
+    const relPath = path.relative(__dirname, fullPath);
+
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      walkDir(fullPath, callback);
+    } else if (
+      [".js", ".jsx", ".ts", ".tsx", ".json", ".mjs", ".cjs"].includes(
+        path.extname(file)
+      )
+    ) {
+      callback(fullPath, relPath);
+    }
+  });
+};
+
+// Process top-level files in the current directory
+const processRootFiles = () => {
+  const { colors } = useTheme();
+  fs.readdirSync(__dirname).forEach((file) => {
+    const fullPath = path.join(__dirname, file);
+    const relPath = path.relative(__dirname, fullPath);
+
+    if (isExcluded(relPath)) return;
+
+    const stat = fs.statSync(fullPath);
+    if (
+      !stat.isDirectory() &&
+      [".js", ".jsx", ".ts", ".tsx", ".json", ".mjs", ".cjs"].includes(
+        path.extname(file)
+      )
+    ) {
+      try {
+        const content = fs.readFileSync(fullPath, "utf8");
+        bundledCode += `## File: ${relPath}\n\`\`\`${path
+          .extname(file)
+          .substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    }
+  });
+};
+
+// Collect code
+processRootFiles();
+directoriesToInclude.filter((dir) => dir !== ".").forEach((dir) => {
+  const dirPath = path.join(__dirname, dir);
+  if (fs.existsSync(dirPath)) {
+    walkDir(dirPath, (fullPath, relPath) => {
+      try {
+        const content = fs.readFileSync(fullPath, "utf8");
+        bundledCode += `## File: ${relPath}\n\`\`\`${path
+          .extname(fullPath)
+          .substring(1)}\n${content}\n\`\`\`\n\n`;
+      } catch (err) {
+        console.error(`Error reading file ${fullPath}: ${err}`);
+      }
+    });
+  }
+});
+
+// Write to output file
+fs.writeFileSync(path.join(__dirname, outputFile), bundledCode, "utf8");
+console.log(`Bundled code written to ${outputFile}`);
+
+```
+
 ## File: db.json
 ```json
 {
@@ -190,7 +489,7 @@
 /// <reference types="next/image-types/global" />
 
 // NOTE: This file should not be edited
-// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.
 
 ```
 
@@ -198,12 +497,15 @@
 ```mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-productionBrowserSourceMaps: true,
-images: {
+  eslint: { 
+  ignoreDuringBuilds: true
+   },
+  productionBrowserSourceMaps: true,
+  images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
@@ -274,6 +576,7 @@ export default config;
 
 ## File: tailwind.config.ts
 ```ts
+import { useTheme } from '../context/ThemeContext';
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -864,7 +1167,6 @@ import { getServerSession } from "next-auth/next";
 import prisma from "../../../../lib/prisma";
 import { authOptions } from "../../../../lib/authOptions";
 
-
 interface CustomSession {
   user: {
     id: string;
@@ -1100,7 +1402,6 @@ export async function POST(request) {
 ```js
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
-
 
 export async function GET(request, {params}) { 
 const {id} = await params
@@ -1391,7 +1692,6 @@ import { useRouter } from "next/navigation";
 import { NotificationContext } from "../../NotificationProvider";
 import { useSession } from "next-auth/react";
 
-
 export default function Register() {
   const { showNotification } = useContext(NotificationContext);
   const [name, setName] = useState("");
@@ -1400,7 +1700,6 @@ export default function Register() {
   const router = useRouter();
 
   const { status } = useSession();
-
 
   if (status === "authenticated") {
     router.push("/feed");
@@ -1557,6 +1856,7 @@ export default function SignIn() {
 
 ## File: app\chat\page.jsx
 ```jsx
+import { useTheme } from '../../../context/ThemeContext';
 "use client";
 
 import { useEffect, useState } from "react";
@@ -1569,7 +1869,6 @@ import { useNavigation } from "../context/NavigationContext";
 import { PageWrapper } from "../components/PageWrapper";
 import Image from "next/image";
 
-
 export default function ChatPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -1578,7 +1877,6 @@ export default function ChatPage() {
   const [chatUsers, setChatUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { direction } = useNavigation();
-
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -1697,8 +1995,10 @@ export default function ChatPage() {
 ```jsx
 
 import Image from "next/image";
+import { useTheme } from '../../../context/ThemeContext';
 
 const Avatars = () => {
+  const { colors } = useTheme();
   return (
     <div>
       <Image src="/images/user.png"  alt="Avatar" width={100} height={100} />
@@ -1879,7 +2179,6 @@ const MessageItem = memo(({ message, isSender }) => (
   prev.isSender === next.isSender
 );
 
-
 export default function ChatWindow({ senderId, receiverId }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1986,7 +2285,6 @@ import {
 } from "@dotlottie/react-player";
 
 const FeedIcon: React.FC = () => {
-
 
   return (
     <div className="relative w-8 h-8 m-1">
@@ -2250,6 +2548,7 @@ export default Like;
 "use client";
 
 import React from 'react';
+import { useTheme } from '../../../context/ThemeContext';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
 interface LoadingProps {
@@ -2258,6 +2557,7 @@ interface LoadingProps {
 }
 
 const Loading = ({ width = 700, height = 700 }: LoadingProps) => {
+  const { colors } = useTheme();
   return (
     <div className="flex justify-center align-middle loading-container bg-slate-300 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <DotLottiePlayer
@@ -2282,7 +2582,6 @@ import {
 } from "@dotlottie/react-player";
 
 const LogOutIcon: React.FC = () => {
-
 
   return (
     <div className="relative w-8 h-8 m-1">
@@ -2473,7 +2772,6 @@ export default function MessageInput({ senderId, receiverId, onMessageSent }) {
 
   
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim() || sending) return;
@@ -2542,7 +2840,6 @@ import {
 } from "@dotlottie/react-player";
 
 const MessagesIcon: React.FC = () => {
-
 
   return (
     <div className="relative w-8 h-8 m-1">
@@ -2615,8 +2912,6 @@ export default function NavBar() {
       signOut({ callbackUrl: '/' });
     }, 1000);
   };
-
-
 
   return (
     <nav className="rounded-lg md:my-9 w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white pl-5 md:px-8 md:py-6 flex justify-between items-center relative z-20 shadow-lg border border-gray-700" ref={menuRef}>
@@ -2728,7 +3023,9 @@ export default function NavBar() {
 ```tsx
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react"
+import { useTheme } from '../context/ThemeContext';
+;
 import { DotLottiePlayer } from "@dotlottie/react-player";
 import Thrash from "./Thrash";
 import styles from "./Notification.module.css";
@@ -2868,6 +3165,7 @@ export function PageWrapper({ children, direction }) {
 
 ## File: app\components\Post.tsx
 ```tsx
+import { useTheme } from '../context/ThemeContext';
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -3176,7 +3474,6 @@ import {
 
 const ProfileIcon: React.FC = () => {
 
-
   return (
     <div className="relative w-8 h-8 m-1">
       <DotLottiePlayer
@@ -3283,9 +3580,6 @@ import React, { useRef } from "react";
 const Thrash: React.FC = () => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
 
-
-
-
   return (
     <div className="w-9 h-9">
       <DotLottiePlayer
@@ -3314,10 +3608,11 @@ export default function TypingIndicator() {
 ```jsx
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"
+import { useTheme } from '../context/ThemeContext';
+;
 import {randomColor} from 'randomcolor'
 import { useSession } from "next-auth/react";
-
 
 export default function UserOP({ id }) {
   const [userData, setUserData] = useState(null);
@@ -3381,10 +3676,11 @@ export default function UserOP({ id }) {
 "use client";
 
 import React from 'react';
+import { useTheme } from '../../../context/ThemeContext';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
-
 const WelcomePage = () => {
+  const { colors } = useTheme();
   return (
     <div className="mr-24 flex justify-center align-middle  text-slate-900 ">
       <DotLottiePlayer
@@ -4171,8 +4467,6 @@ export interface NotificationItem {
   persistent?: boolean;
 }
 
-
-
 export type Action =
   | { type: "ADD_NOTIFICATION"; payload: Omit<NotificationItem, "onRemove" | "onHover"> }
   | { type: "REMOVE_NOTIFICATION"; payload: number };
@@ -4209,7 +4503,6 @@ import { useNavigation } from "./context/NavigationContext";
 export default function HomePage() {
   const { data: session, status } = useSession();
   const { direction } = useNavigation();
-
 
   if (status === "loading") {
     return(
@@ -4323,6 +4616,7 @@ export default function Profile(){
 
 ## File: app\profile\[id]\page.jsx
 ```jsx
+import { useTheme } from '../../../../context/ThemeContext';
 "use client";
 import { useEffect, useState } from "react";
 import FollowButton from "../../components/FollowButton";
@@ -4557,6 +4851,7 @@ export default NextAuth(authOptions);
 
 ## File: lib\generateUserColors.ts
 ```ts
+import { useTheme } from '../../context/ThemeContext';
 import { PrismaClient } from "@prisma/client";
 import randomColor from "randomcolor";
 

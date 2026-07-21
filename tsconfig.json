@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2022",
     "lib": [
       "dom",
       "dom.iterable",
@@ -13,7 +13,7 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -23,8 +23,7 @@
         "name": "next"
       }
     ],
-    "noImplicitAny": false,
-    "ignoreDeprecations": "5.0",
+    "noImplicitAny": false
   },
   "include": [
     "next-env.d.ts",
@@ -32,8 +31,10 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "app/api/posts/[id]/delete/route copy.js",
-    "app/components/UserOP.jsx"
-, "app/api/messages/typing/route.js", "app/api/users/typing/route.js"  ],
+    "app/components/UserOP.jsx",
+    "app/api/messages/typing/route.js",
+    "app/api/users/typing/route.js"
+  ],
   "exclude": [
     "node_modules"
   ]

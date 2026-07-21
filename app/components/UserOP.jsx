@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"
+;
 import {randomColor} from 'randomcolor'
 import { useSession } from "next-auth/react";
-
 
 export default function UserOP({ id }) {
   const [userData, setUserData] = useState(null);

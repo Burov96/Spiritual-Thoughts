@@ -1,5 +1,6 @@
-"use client";
-import { useEffect, useState } from "react";
+"use client"; 
+import { useTheme } from '../../../../context/ThemeContext';
+import { useEffect, useState, use } from "react"; 
 import FollowButton from "../../components/FollowButton";
 import MessageButton from "../../components/MessageButton";
 import Image from "next/image";
@@ -8,8 +9,13 @@ import { randomColor } from "randomcolor";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
-export default async function Profile({ params }) {
-  const id = await params.id;
+
+
+export default function Profile({ params }) {
+  
+  const unwrappedParams = use(params);
+  const id = unwrappedParams.id;
+
   const [user, setUser] = useState(null);
   const [outlineColor, setOutlineColor] = useState("");
   const { data: session } = useSession();
@@ -22,10 +28,16 @@ export default async function Profile({ params }) {
     }
   }, [id]);
 
-  setTimeout(() => {
-    setOutlineColor(randomColor());
-  }, 2000);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setOutlineColor(randomColor());
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   if (!user) return <Loading />;
+  
   const color = user.color;
 
   return (
@@ -47,19 +59,20 @@ export default async function Profile({ params }) {
       <p className="text-center text-gray-200">{user.posts.length} posts</p>
       <div className="mt-4 text-center">
         <h3 className="font-semibold">Interests:</h3>
-        <h4 className="opacity-40 text-green-900">~// Coming soon //~ </h4>
+        <h4 className="opacity-40 text-green-900">~
         <ul className="list-disc list-inside">
           {user.interests.map((interest) => (
             <li key={interest}>{interest}</li>
           ))}
         </ul>
-        {user.id !== session.user.id ? (
+        </h4>
+        {user.id !== session?.user?.id ? (
           <div className="flex flex-row justify-center gap-3">
             <div className="mt-4">
               <FollowButton userId={user.id} />
             </div>
             <div className="mt-4">
-              <MessageButton receiverId={session.user.id} senderId={user.id}  />
+              <MessageButton receiverId={session?.user?.id} senderId={user.id}  />
             </div>
           </div>
         ) : (

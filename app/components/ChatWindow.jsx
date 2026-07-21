@@ -21,7 +21,6 @@ const MessageItem = memo(({ message, isSender }) => (
   prev.isSender === next.isSender
 );
 
-
 export default function ChatWindow({ senderId, receiverId }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);

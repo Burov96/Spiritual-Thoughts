@@ -11,7 +11,6 @@ export default function HomePage() {
   const { data: session, status } = useSession();
   const { direction } = useNavigation();
 
-
   if (status === "loading") {
     return(
       <div className="min-h-screen bg-gray-100 ">

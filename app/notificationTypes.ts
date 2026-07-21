@@ -15,8 +15,6 @@ export interface NotificationItem {
   persistent?: boolean;
 }
 
-
-
 export type Action =
   | { type: "ADD_NOTIFICATION"; payload: Omit<NotificationItem, "onRemove" | "onHover"> }
   | { type: "REMOVE_NOTIFICATION"; payload: number };

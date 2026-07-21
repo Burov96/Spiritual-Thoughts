@@ -1,7 +1,7 @@
 "use client";
 
 import { DotLottieCommonPlayer, DotLottiePlayer } from '@dotlottie/react-player';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface LikeProps {
   userInfluenced: boolean;
@@ -9,28 +9,33 @@ interface LikeProps {
 
 const Like = ({ userInfluenced }: LikeProps) => {
   const playerRef = useRef<DotLottieCommonPlayer | null>(null);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
   useEffect(() => {
     if (playerRef.current) {
-      setTimeout(() => {
-        if (userInfluenced) {
-          playerRef.current?.playSegments([65, 67], true);
-        } else {
-          playerRef.current?.playSegments([10, 0], true);
-        }
-      }, 70);
-    }
-  }, [userInfluenced]);
+      // 1. При първоначално зареждане
+      if (isFirstRender) {
+        // Даваме 100ms на браузъра да парсне Lottie анимацията, преди да я превъртим
+        setTimeout(() => {
+          if (userInfluenced) {
+            playerRef.current?.playSegments([67, 67], true); // Заковаваме на пълно сърце
+          } else {
+            playerRef.current?.playSegments([0, 0], true); // Заковаваме на празно сърце
+          }
+          setIsFirstRender(false);
+        }, 100); 
+        return;
+      }
 
-  useEffect(() => {
-    if (playerRef.current) {
+      // 2. При кликане (Оптимистичен ъпдейт)
+      // Тук файлът вече е зареден и нямаме нужда от никакво забавяне!
       if (userInfluenced) {
-        playerRef.current.playSegments([0, 67], true);
+        playerRef.current.playSegments([0, 67], true); // Анимираме напълването
       } else {
-        playerRef.current.playSegments([40, 0], true);
+        playerRef.current.playSegments([40, 0], true); // Анимираме изпразването
       }
     }
-  }, [userInfluenced]);
+  }, [userInfluenced, isFirstRender]);
 
   return (
     <div className='w-10 h-10'>

@@ -1,3 +1,4 @@
+import { useTheme } from '../../context/ThemeContext';
 import { PrismaClient } from "@prisma/client";
 import randomColor from "randomcolor";
 

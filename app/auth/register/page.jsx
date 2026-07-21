@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { NotificationContext } from "../../NotificationProvider";
 import { useSession } from "next-auth/react";
 
-
 export default function Register() {
   const { showNotification } = useContext(NotificationContext);
   const [name, setName] = useState("");
@@ -14,7 +13,6 @@ export default function Register() {
   const router = useRouter();
 
   const { status } = useSession();
-
 
   if (status === "authenticated") {
     router.push("/feed");

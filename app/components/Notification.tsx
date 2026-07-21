@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react"
+import { useTheme } from '../context/ThemeContext';
+;
 import { DotLottiePlayer } from "@dotlottie/react-player";
 import Thrash from "./Thrash";
 import styles from "./Notification.module.css";

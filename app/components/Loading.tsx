@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { useTheme } from '../../../context/ThemeContext';
 import { DotLottiePlayer } from '@dotlottie/react-player';
 
 interface LoadingProps {
@@ -9,6 +10,7 @@ interface LoadingProps {
 }
 
 const Loading = ({ width = 700, height = 700 }: LoadingProps) => {
+  const { colors } = useTheme();
   return (
     <div className="flex justify-center align-middle loading-container bg-slate-300 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <DotLottiePlayer

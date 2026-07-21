@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import { NotificationProvider } from "./NotificationProvider";
 import { NavigationProvider } from "./context/NavigationContext";
 import { AnimatePresence } from "framer-motion";
+import { ThemeProvider, useTheme } from "../../context/ThemeContext";
 
 const geistSans = localFont({
   src: "../public/fonts/GeistVF.woff",
@@ -33,17 +34,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProviderWrapper>
           <NotificationProvider>
             <NavigationProvider>
-              <div className="flex flex-col flex-1 overflow-hidden">
-                <NavBar />
-                <main className="flex-grow overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-                  <div className="max-w-7xl mx-auto">
-                    <AnimatePresence mode="wait" initial={false}>
-                      {children}
-                    </AnimatePresence>
-                  </div>
-                </main>
-                <Footer />
-              </div>
+              {/* 2. Обгърни съдържанието с ThemeProvider */}
+              <ThemeProvider>
+                <div className="flex flex-col flex-1 overflow-hidden">
+                  <NavBar />
+                  <main className="flex-grow overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                      <AnimatePresence mode="wait" initial={false}>
+                        {children}
+                      </AnimatePresence>
+                    </div>
+                  </main>
+                  <Footer />
+                </div>
+              </ThemeProvider>
             </NavigationProvider>
           </NotificationProvider>
         </SessionProviderWrapper>
