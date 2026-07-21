@@ -1,6 +1,5 @@
 "use client";
-// import { useTheme } from '../../context/ThemeContext';
-
+import { useTheme } from '@/app/context/ThemeContext';
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";

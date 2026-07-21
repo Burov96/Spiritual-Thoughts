@@ -1,5 +1,5 @@
 "use client"; 
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '@/app/context/ThemeContext';
 import { useEffect, useState, use } from "react"; 
 import FollowButton from "../../components/FollowButton";
 import MessageButton from "../../components/MessageButton";
