@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
-import { useTheme } from '../../../context/ThemeContext';
 import { DotLottiePlayer } from '@dotlottie/react-player';
+import { useTheme } from '../../../context/ThemeContext';
 
 const WelcomePage = () => {
   const { colors } = useTheme();

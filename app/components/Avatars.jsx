@@ -1,6 +1,6 @@
 
 import Image from "next/image";
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Avatars = () => {
   const { colors } = useTheme();
