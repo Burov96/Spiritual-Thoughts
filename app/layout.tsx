@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 import { NotificationProvider } from "./NotificationProvider";
 import { NavigationProvider } from "./context/NavigationContext";
 import { AnimatePresence } from "framer-motion";
-import { ThemeProvider, useTheme } from "../../context/ThemeContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 
 const geistSans = localFont({
   src: "../public/fonts/GeistVF.woff",

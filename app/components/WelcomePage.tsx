@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DotLottiePlayer } from '@dotlottie/react-player';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 
 const WelcomePage = () => {
   const { colors } = useTheme();
