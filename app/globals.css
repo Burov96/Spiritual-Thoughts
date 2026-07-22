@@ -69,3 +69,43 @@ h1 {
   from { max-height: 0; opacity: 0; }
   to { max-height: 1000px; opacity: 1; } 
 }
+.logo-text {
+  font-family: 'Georgia', serif; /* или каквато decorative серифна ползваш за "Thoughts" */
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: linear-gradient(
+    90deg,
+    #6b7ec5 0%,
+    #b48fd4 35%,
+    #d9a5d0 55%,
+    #e8c17a 80%,
+    #f0c95a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  transition: filter 0.4s ease, background-position 0.6s ease;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.logo-text:hover {
+  background-position: right center;
+  filter: drop-shadow(0 0 8px rgba(180, 143, 212, 0.7))
+          drop-shadow(0 0 16px rgba(240, 201, 90, 0.5));
+}
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(180, 143, 212, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(240, 201, 90, 0.6));
+  }
+}
+
+.logo-text {
+  animation: glow-pulse 3s ease-in-out infinite;
+}

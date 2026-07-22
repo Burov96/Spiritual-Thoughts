@@ -65,7 +65,7 @@ export default function NavBar() {
         }`}
         onClick={() => handleNavigation('/')}
       >
-        Spiritual Thoughts
+        <div  className="logo-text">Spiritual Thoughts</div>
       </Link>
       
       {/* DESKTOP VIEW */}

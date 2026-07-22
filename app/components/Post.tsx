@@ -39,12 +39,22 @@ interface PostProps {
 export  function Post({ post }: PostProps) {
   const { data: session } = useSession();
   const router = useRouter();
-const [userInfluenced, setUserInfluenced] = useState(() => {
-    return post.influences?.some((influence) => influence.user.email === session?.user?.email) || false;
-  });
-  const [influenced, setInfluenced] = useState(post.influences?.length || 0);
+const [userInfluenced, setUserInfluenced] = useState(false);
+const [influenced, setInfluenced] = useState(0);
+
+useEffect(() => {
+  if (session?.user?.email && post.influences) {
+    const isLiked = post.influences.some(
+      (influence) => influence.user.email === session.user.email
+    );
+    setUserInfluenced(isLiked);
+    setInfluenced(post.influences.length);
+  }
+}, [session?.user?.email, post.influences]);
   const { showNotification } = useNotification();
   const isAuthor = session?.user?.email === post.author.email;
+
+  
 
   // useEffect(() => {
   //   if (session?.user?.email && post.influences) {

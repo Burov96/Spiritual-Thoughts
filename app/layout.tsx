@@ -34,7 +34,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProviderWrapper>
           <NotificationProvider>
             <NavigationProvider>
-              {/* 2. Обгърни съдържанието с ThemeProvider */}
               <ThemeProvider>
                 <div className="flex flex-col flex-1 overflow-hidden">
                   <NavBar />
